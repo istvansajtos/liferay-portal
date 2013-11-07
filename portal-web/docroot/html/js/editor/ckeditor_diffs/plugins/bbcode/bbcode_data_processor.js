@@ -342,7 +342,7 @@
 		},
 
 		_isAllWS: function(node) {
-			return node.isElementContentWhitespace || !(REGEX_NOT_WHITESPACE.test(node.data));
+			return node.isElementContentWhitespace;
 		},
 
 		_isIgnorable: function(node) {
