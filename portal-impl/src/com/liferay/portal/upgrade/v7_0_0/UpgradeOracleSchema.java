@@ -53,13 +53,13 @@ public class UpgradeOracleSchema extends UpgradeProcess {
 				String columnName = rs.getString(2);
 				int dataLength = rs.getInt(3);
 
-					// LPS-33903
+				// LPS-33903
 
-					if (!ArrayUtil.contains(
-							_ORIGINAL_DATA_LENGTH_VALUES, dataLength)) {
+				if (!ArrayUtil.contains(
+						_ORIGINAL_DATA_LENGTH_VALUES, dataLength)) {
 
-						dataLength = dataLength / 4;
-					}
+					dataLength = dataLength / 4;
+				}
 
 				try {
 					runSQL(
