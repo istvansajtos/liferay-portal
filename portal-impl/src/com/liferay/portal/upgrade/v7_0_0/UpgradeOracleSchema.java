@@ -53,6 +53,11 @@ public class UpgradeOracleSchema extends UpgradeProcess {
 				String columnName = rs.getString(2);
 				int dataLength = rs.getInt(3);
 
+				// LPS-44965
+
+				if (ArrayUtil.contains(
+						_AFFECTED_PORTAL_TABLE_NAMES, tableName, true)) {
+
 				// LPS-33903
 
 				if (!ArrayUtil.contains(
@@ -85,6 +90,7 @@ public class UpgradeOracleSchema extends UpgradeProcess {
 						throw sqle;
 					}
 				}
+				}
 			}
 		}
 		finally {
@@ -102,6 +108,60 @@ public class UpgradeOracleSchema extends UpgradeProcess {
 
 		alterVarchar2Columns();
 	}
+
+	private static final String[] _AFFECTED_PORTAL_TABLE_NAMES = new String[] {
+		"Account_", "Address", "AnnouncementsDelivery", "AnnouncementsEntry",
+		"AnnouncementsFlag", "AssetCategory", "AssetCategoryProperty",
+		"AssetEntries_AssetCategories", "AssetEntries_AssetTags", "AssetEntry",
+		"AssetLink", "AssetTag", "AssetTagProperty", "AssetTagStats",
+		"AssetVocabulary", "BlogsEntry", "BlogsStatsUser", "BookmarksEntry",
+		"BookmarksFolder", "BrowserTracker", "CalEvent", "ClassName_",
+		"ClusterGroup", "Company", "Contact_", "Counter", "Country",
+		"CyrusUser", "CyrusVirtual", "DDLRecord", "DDLRecordSet",
+		"DDLRecordVersion", "DDMContent", "DDMStorageLink", "DDMStructure",
+		"DDMStructureLink", "DDMTemplate", "DLContent", "DLFileEntry",
+		"DLFileEntryMetadata", "DLFileEntryType",
+		"DLFileEntryTypes_DDMStructures", "DLFileEntryTypes_DLFolders",
+		"DLFileRank", "DLFileShortcut", "DLFileVersion", "DLFolder", "DLSync",
+		"EmailAddress", "ExpandoColumn", "ExpandoRow", "ExpandoTable",
+		"ExpandoValue", "Group_", "Groups_Orgs", "Groups_Permissions",
+		"Groups_Roles", "Groups_UserGroups", "IGFolder", "IGImage", "Image",
+		"JournalArticle", "JournalArticleImage", "JournalArticleResource",
+		"JournalContentSearch", "JournalFeed", "JournalStructure",
+		"JournalTemplate", "Layout", "LayoutBranch", "LayoutPrototype",
+		"LayoutRevision", "LayoutSet", "LayoutSetBranch", "LayoutSetPrototype",
+		"ListType", "Lock_", "MBBan", "MBCategory", "MBDiscussion",
+		"MBMailingList", "MBMessage", "MBMessageFlag", "MBStatsUser",
+		"MBThread", "MBThreadFlag", "MDRAction", "MDRRule", "MDRRuleGroup",
+		"MDRRuleGroupInstance", "MembershipRequest", "OrgGroupPermission",
+		"OrgGroupRole", "OrgLabor", "Organization_", "PasswordPolicy",
+		"PasswordPolicyRel", "PasswordTracker", "Permission_", "Phone",
+		"PluginSetting", "PollsChoice", "PollsQuestion", "PollsVote",
+		"PortalPreferences", "Portlet", "PortletItem", "PortletPreferences",
+		"RatingsEntry", "RatingsStats", "Region", "Release_", "Repository",
+		"RepositoryEntry", "ResourceAction", "ResourceBlock",
+		"ResourceBlockPermission", "ResourceCode", "ResourcePermission",
+		"ResourceTypePermission", "Resource_", "Role_", "Roles_Permissions",
+		"SCFrameworkVersi_SCProductVers", "SCFrameworkVersion", "SCLicense",
+		"SCLicenses_SCProductEntries", "SCProductEntry", "SCProductScreenshot",
+		"SCProductVersion", "ServiceComponent", "Shard", "ShoppingCart",
+		"ShoppingCategory", "ShoppingCoupon", "ShoppingItem",
+		"ShoppingItemField", "ShoppingItemPrice", "ShoppingOrder",
+		"ShoppingOrderItem", "SocialActivity", "SocialActivityAchievement",
+		"SocialActivityCounter", "SocialActivityLimit", "SocialActivitySetting",
+		"SocialEquityAssetEntry", "SocialEquityGroupSetting",
+		"SocialEquityHistory", "SocialEquityLog", "SocialEquitySetting",
+		"SocialEquityUser", "SocialRelation", "SocialRequest", "Subscription",
+		"TagsAsset", "TagsAssets_TagsEntries", "TagsEntry", "TagsProperty",
+		"TagsSource", "TagsVocabulary", "TasksProposal", "TasksReview", "Team",
+		"Ticket", "UserGroup", "UserGroupGroupRole", "UserGroupRole",
+		"UserGroups_Teams", "UserIdMapper", "UserNotificationEvent",
+		"UserTracker", "UserTrackerPath", "User_", "Users_Groups", "Users_Orgs",
+		"Users_Permissions", "Users_Roles", "Users_Teams", "Users_UserGroups",
+		"VirtualHost", "Vocabulary", "WebDAVProps", "Website", "WikiNode",
+		"WikiPage", "WikiPageResource", "WorkflowDefinitionLink",
+		"WorkflowInstanceLink"
+	};
 
 	private static final int[] _ORIGINAL_DATA_LENGTH_VALUES = {
 		75, 100, 150, 200, 255, 500, 1000, 1024, 2000, 4000
