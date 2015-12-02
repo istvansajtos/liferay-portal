@@ -1084,15 +1084,19 @@ public class HttpImpl implements Http {
 			return url;
 		}
 
-		if (url.startsWith(Http.HTTP_WITH_SLASH)) {
-			return url.substring(Http.HTTP_WITH_SLASH.length());
+		if (url.contains(Http.PROTOCOL_DELIMITER)) {
+			int pos = url.lastIndexOf(Http.PROTOCOL_DELIMITER);
+
+			url = url.substring(pos + Http.PROTOCOL_DELIMITER.length());
 		}
-		else if (url.startsWith(Http.HTTPS_WITH_SLASH)) {
-			return url.substring(Http.HTTPS_WITH_SLASH.length());
+
+		if (Pattern.matches("\\s*//.*", url)) {
+			String[] splittedUrl = url.split("[\\s/]*//[\\s/]*");
+
+			url = url.substring(url.indexOf(splittedUrl[1]));
 		}
-		else {
-			return url;
-		}
+
+		return url;
 	}
 
 	@Override
