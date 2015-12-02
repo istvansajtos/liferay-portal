@@ -121,6 +121,10 @@ public class HttpImpl implements Http {
 
 		Protocol.registerProtocol("http", protocol);
 
+		_absoluteURLPattern =
+			Pattern.compile("[a-zA-Z][a-zA-Z0-9+-.]+://(?!//).*((?!://).)*");
+		_relativeURLPattern = Pattern.compile("\\.{0,2}/?[^/]((?!://).)*");
+
 		// Mimic behavior found in
 		// http://java.sun.com/j2se/1.5.0/docs/guide/net/properties.html
 
@@ -1084,15 +1088,18 @@ public class HttpImpl implements Http {
 			return url;
 		}
 
-		if (url.startsWith(Http.HTTP_WITH_SLASH)) {
-			return url.substring(Http.HTTP_WITH_SLASH.length());
-		}
-		else if (url.startsWith(Http.HTTPS_WITH_SLASH)) {
-			return url.substring(Http.HTTPS_WITH_SLASH.length());
-		}
-		else {
+		if (_absoluteURLPattern.matcher(url).matches()) {
+			int pos = url.indexOf(Http.PROTOCOL_DELIMITER);
+
+			url = url.substring(pos + Http.PROTOCOL_DELIMITER.length());
+
 			return url;
 		}
+		else if (_relativeURLPattern.matcher(url).matches()) {
+			return url;
+		}
+
+		return null;
 	}
 
 	@Override
@@ -1802,10 +1809,12 @@ public class HttpImpl implements Http {
 
 	private static final ThreadLocal<Cookie[]> _cookies = new ThreadLocal<>();
 
+	private final Pattern _absoluteURLPattern;
 	private final HttpClient _httpClient = new HttpClient();
 	private final Pattern _nonProxyHostsPattern;
 	private final Credentials _proxyCredentials;
 	private final HttpClient _proxyHttpClient = new HttpClient();
+	private final Pattern _relativeURLPattern;
 
 	private class FastProtocolSocketFactory
 		extends DefaultProtocolSocketFactory {
