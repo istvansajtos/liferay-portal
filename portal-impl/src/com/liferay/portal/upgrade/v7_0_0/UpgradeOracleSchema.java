@@ -58,38 +58,39 @@ public class UpgradeOracleSchema extends UpgradeProcess {
 				if (ArrayUtil.contains(
 						_AFFECTED_PORTAL_TABLE_NAMES, tableName, true)) {
 
-				// LPS-33903
-
-				if (!ArrayUtil.contains(
-						_ORIGINAL_DATA_LENGTH_VALUES, dataLength)) {
-
-					dataLength = dataLength / 4;
-				}
-
-				try {
-					runSQL(
-						"alter table " + tableName + " modify " + columnName +
-							" varchar2(" + dataLength + " char)");
-				}
-				catch (SQLException sqle) {
-					if (sqle.getErrorCode() == 1441) {
-						if (_log.isWarnEnabled()) {
-							StringBundler sb = new StringBundler(6);
-
-							sb.append("Unable to alter length of column ");
-							sb.append(columnName);
-							sb.append(" for table ");
-							sb.append(tableName);
-							sb.append(" because it contains values that are ");
-							sb.append("larger than the new column length");
-
-							_log.warn(sb.toString());
+					// LPS-33903
+	
+					if (!ArrayUtil.contains(
+							_ORIGINAL_DATA_LENGTH_VALUES, dataLength)) {
+	
+						dataLength = dataLength / 4;
+					}
+	
+					try {
+						runSQL(
+							"alter table " + tableName + " modify " + columnName +
+								" varchar2(" + dataLength + " char)");
+					}
+					catch (SQLException sqle) {
+						if (sqle.getErrorCode() == 1441) {
+							if (_log.isWarnEnabled()) {
+								StringBundler sb = new StringBundler(6);
+	
+								sb.append("Unable to alter length of column ");
+								sb.append(columnName);
+								sb.append(" for table ");
+								sb.append(tableName);
+								sb.append(
+									" because it contains values that are ");
+								sb.append("larger than the new column length");
+	
+								_log.warn(sb.toString());
+							}
+						}
+						else {
+							throw sqle;
 						}
 					}
-					else {
-						throw sqle;
-					}
-				}
 				}
 			}
 		}
