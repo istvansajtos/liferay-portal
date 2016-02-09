@@ -22,7 +22,6 @@ import com.liferay.portal.kernel.log.Log;
 import com.liferay.portal.kernel.log.LogFactoryUtil;
 import com.liferay.portal.kernel.upgrade.UpgradeProcess;
 import com.liferay.portal.kernel.util.ArrayUtil;
-import com.liferay.portal.kernel.util.ReleaseInfo;
 import com.liferay.portal.kernel.util.StringBundler;
 
 import java.sql.PreparedStatement;
@@ -37,8 +36,6 @@ import java.sql.SQLException;
 public class UpgradeOracleSchema extends UpgradeProcess {
 
 	protected void alterVarchar2Columns() throws Exception {
-		int buildNumber = getBuildNumber();
-
 		PreparedStatement ps = null;
 		ResultSet rs = null;
 
@@ -53,19 +50,8 @@ public class UpgradeOracleSchema extends UpgradeProcess {
 			while (rs.next()) {
 				String tableName = rs.getString(1);
 
-				if (!isPortalTableName(tableName)) {
-					continue;
-				}
-
 				String columnName = rs.getString(2);
 				int dataLength = rs.getInt(3);
-
-				if (isBetweenBuildNumbers(
-						buildNumber, ReleaseInfo.RELEASE_5_2_9_BUILD_NUMBER,
-						ReleaseInfo.RELEASE_6_0_0_BUILD_NUMBER) ||
-					isBetweenBuildNumbers(
-						buildNumber, ReleaseInfo.RELEASE_6_0_5_BUILD_NUMBER,
-						ReleaseInfo.RELEASE_6_1_20_BUILD_NUMBER)) {
 
 					// LPS-33903
 
@@ -74,7 +60,6 @@ public class UpgradeOracleSchema extends UpgradeProcess {
 
 						dataLength = dataLength / 4;
 					}
-				}
 
 				try {
 					runSQL(
@@ -116,18 +101,6 @@ public class UpgradeOracleSchema extends UpgradeProcess {
 		}
 
 		alterVarchar2Columns();
-	}
-
-	protected boolean isBetweenBuildNumbers(
-		int buildNumber, int startBuildNumber, int endBuildNumber) {
-
-		if ((buildNumber >= startBuildNumber) &&
-			(buildNumber < endBuildNumber)) {
-
-			return true;
-		}
-
-		return false;
 	}
 
 	private static final int[] _ORIGINAL_DATA_LENGTH_VALUES = {
