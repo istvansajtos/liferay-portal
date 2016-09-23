@@ -29,7 +29,10 @@ import com.swabunga.spell.event.DefaultWordFinder;
 import com.swabunga.spell.event.SpellChecker;
 import com.swabunga.spell.event.StringWordTokenizer;
 
+import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 
 import java.util.HashSet;
 import java.util.List;
@@ -81,20 +84,70 @@ public class WordsImpl implements Words {
 
 	@Override
 	public String getRandomWord() {
-		List<String> dictionaryList = getDictionaryList();
+		String randomWord = null;
 
-		Random random = new Random(SecureRandomUtil.nextLong());
+		try {
+			BufferedReader reader = _getWordsBufferedReader();
 
-		int pos = random.nextInt(dictionaryList.size());
+			int count = 0;
 
-		return dictionaryList.get(pos);
+			while (reader.readLine() != null) {
+				count++;
+			}
+
+			reader.close();
+
+			Random random = new Random(SecureRandomUtil.nextLong());
+
+			int pos = random.nextInt(count);
+
+			reader = _getWordsBufferedReader();
+
+			count = 1;
+
+			while (count != pos) {
+				reader.readLine();
+
+				count++;
+			}
+
+			randomWord = reader.readLine();
+
+			reader.close();
+		}
+		catch (IOException ioe) {
+			_log.error(ioe);
+		}
+
+		return randomWord;
 	}
 
 	@Override
 	public boolean isDictionaryWord(String word) {
-		Set<String> dictionarySet = getDictionarySet();
+		boolean dictionaryWord = false;
 
-		return dictionarySet.contains(word);
+		try {
+			BufferedReader reader = _getWordsBufferedReader();
+
+			String line = reader.readLine();
+
+			while (line != null) {
+				if (line.equals(word)) {
+					dictionaryWord = true;
+
+					break;
+				}
+
+				line = reader.readLine();
+			}
+
+			reader.close();
+		}
+		catch (IOException ioe) {
+			_log.error(ioe);
+		}
+
+		return dictionaryWord;
 	}
 
 	protected SpellDictionaryHashMap getSpellDictionaryHashMap() {
@@ -124,6 +177,20 @@ public class WordsImpl implements Words {
 		}
 
 		return _spellDictionaryHashMap;
+	}
+
+	private BufferedReader _getWordsBufferedReader() {
+		Class clazz = getClass();
+
+		ClassLoader classLoader = clazz.getClassLoader();
+
+		InputStream inputStream = classLoader.getResourceAsStream(
+			"com/liferay/portal/words/dependencies/words.txt");
+
+		BufferedReader bufferedReader = new BufferedReader(
+			new InputStreamReader(inputStream));
+
+		return bufferedReader;
 	}
 
 	private static final Log _log = LogFactoryUtil.getLog(WordsImpl.class);
