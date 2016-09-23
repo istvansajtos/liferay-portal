@@ -36,6 +36,10 @@ public class WordsUtil {
 		return getWords().getDictionaryList();
 	}
 
+	public static List<String> getDictionarySampleList() {
+		return getWords().getDictionarySampleList();
+	}
+
 	public static Set<String> getDictionarySet() {
 		return getWords().getDictionarySet();
 	}

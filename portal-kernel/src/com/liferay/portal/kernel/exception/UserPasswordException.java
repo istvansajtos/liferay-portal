@@ -285,9 +285,9 @@ public class UserPasswordException extends PortalException {
 			super(
 				String.format(
 					"Password for user %s must not contain dictionary words " +
-						"such as: %s",
-					userId, _getDictionaryWordsString(dictionaryWords)),
-				PASSWORD_CONTAINS_TRIVIAL_WORDS);
+						"such as: %s ...",
+					userId, dictionaryWords.toString()),
+					PASSWORD_CONTAINS_TRIVIAL_WORDS);
 
 			this.userId = userId;
 			this.dictionaryWords = dictionaryWords;

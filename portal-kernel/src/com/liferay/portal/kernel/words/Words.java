@@ -31,6 +31,8 @@ public interface Words {
 
 	public List<String> getDictionaryList();
 
+	public List<String> getDictionarySampleList();
+
 	public Set<String> getDictionarySet();
 
 	public String getRandomWord();

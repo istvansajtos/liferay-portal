@@ -34,6 +34,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Random;
@@ -71,6 +72,38 @@ public class WordsImpl implements Words {
 		}
 
 		return _dictionaryList;
+	}
+
+	@Override
+	public List<String> getDictionarySampleList() {
+		if (_dictionarySampleList == null) {
+			try {
+				BufferedReader reader = _getWordsBufferedReader();
+
+				List<String> sampleWords = new ArrayList<>();
+
+				String line = reader.readLine();
+
+				int count = 1;
+
+				while ((line != null) && (count <= 10)) {
+					sampleWords.add(line);
+
+					line = reader.readLine();
+
+					count++;
+				}
+
+				_dictionarySampleList = sampleWords;
+
+				reader.close();
+			}
+			catch (IOException ioe) {
+				_log.error(ioe);
+			}
+		}
+
+		return _dictionarySampleList;
 	}
 
 	@Override
@@ -196,6 +229,7 @@ public class WordsImpl implements Words {
 	private static final Log _log = LogFactoryUtil.getLog(WordsImpl.class);
 
 	private List<String> _dictionaryList;
+	private List<String> _dictionarySampleList;
 	private Set<String> _dictionarySet;
 	private SpellDictionaryHashMap _spellDictionaryHashMap;
 
