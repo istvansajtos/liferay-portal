@@ -2967,7 +2967,7 @@ Export-Package: com.liferay.ibm.icu;version="4.0.1",com.liferay.ibm.ic
  portal.kernel.xml,javax.servlet.http",com.liferay.portal.kernel.webda
  v.methods;version="6.2.0";uses:="com.liferay.portal.kernel.webdav,jav
  ax.servlet.http",com.liferay.portal.kernel.webserver;version="1.0.0",
- com.liferay.portal.kernel.words;version="1.0.0";uses:="com.liferay.po
+ com.liferay.portal.kernel.words;version="1.1.0";uses:="com.liferay.po
  rtal.kernel.jazzy",com.liferay.portal.kernel.workflow;version="7.0.0"
  ;uses:="com.liferay.asset.kernel.model,com.liferay.portal.kernel.exce
  ption,com.liferay.portal.kernel.messaging.proxy,com.liferay.portal.ke
@@ -3476,7 +3476,7 @@ Export-Package: com.liferay.ibm.icu;version="4.0.1",com.liferay.ibm.ic
  .portal.kernel.repository.model,com.liferay.portal.kernel.security.pa
  cl,com.liferay.portal.kernel.webserver,javax.servlet,javax.servlet.ht
  tp";version="1.0.0",com.liferay.portal.words;uses:="com.liferay.porta
- l.kernel.jazzy,com.liferay.portal.kernel.words";version="1.0.0",com.l
+ l.kernel.jazzy,com.liferay.portal.kernel.words";version="1.1.0",com.l
  iferay.portal.workflow;uses:="com.liferay.portal.kernel.exception,com
  .liferay.portal.kernel.messaging.proxy,com.liferay.portal.kernel.mode
  l,com.liferay.portal.kernel.portlet,com.liferay.portal.kernel.securit
