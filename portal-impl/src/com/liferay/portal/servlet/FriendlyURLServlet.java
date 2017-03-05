@@ -310,7 +310,7 @@ public class FriendlyURLServlet extends HttpServlet {
 			String controlPanelEntryCategory =
 				portlet.getControlPanelEntryCategory();
 
-			if (controlPanelEntryCategory.startsWith(
+			if (!controlPanelEntryCategory.startsWith(
 					LayoutConstants.TYPE_CONTROL_PANEL)) {
 
 				throw new NoSuchGroupException();
