@@ -48,7 +48,7 @@ PanelCategory panelCategory = siteAdministrationPanelCategoryDisplayContext.getP
 
 	siteItemSelectorCriterion.setDesiredItemSelectorReturnTypes(desiredItemSelectorReturnTypes);
 
-	PortletURL itemSelectorURL = itemSelector.getItemSelectorURL(RequestBackedPortletURLFactoryUtil.create(liferayPortletRequest), eventName, siteItemSelectorCriterion);
+	PortletURL itemSelectorURL = itemSelector.getItemSelectorURL(RequestBackedPortletURLFactoryUtil.create(liferayPortletRequest), siteAdministrationPanelCategoryDisplayContext.getGroup(), 0, eventName, siteItemSelectorCriterion);
 	%>
 
 	<aui:script sandbox="<%= true %>">
