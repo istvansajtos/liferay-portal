@@ -25,14 +25,12 @@ import com.liferay.portal.kernel.model.Layout;
 import com.liferay.portal.kernel.model.LayoutConstants;
 import com.liferay.portal.kernel.model.LayoutFriendlyURL;
 import com.liferay.portal.kernel.model.LayoutFriendlyURLComposite;
-import com.liferay.portal.kernel.model.Portlet;
 import com.liferay.portal.kernel.model.User;
 import com.liferay.portal.kernel.security.permission.PermissionChecker;
 import com.liferay.portal.kernel.security.permission.PermissionCheckerFactoryUtil;
 import com.liferay.portal.kernel.service.GroupLocalServiceUtil;
 import com.liferay.portal.kernel.service.LayoutFriendlyURLLocalServiceUtil;
 import com.liferay.portal.kernel.service.LayoutLocalServiceUtil;
-import com.liferay.portal.kernel.service.PortletLocalServiceUtil;
 import com.liferay.portal.kernel.service.ServiceContext;
 import com.liferay.portal.kernel.service.ServiceContextFactory;
 import com.liferay.portal.kernel.service.ServiceContextThreadLocal;
@@ -56,6 +54,7 @@ import com.liferay.portal.kernel.util.WebKeys;
 import com.liferay.portal.util.PortalInstances;
 
 import java.io.IOException;
+
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
@@ -304,14 +303,16 @@ public class FriendlyURLServlet extends HttpServlet {
 			themeDisplay.setPermissionChecker(permissionChecker);
 			themeDisplay.setScopeGroupId(group.getGroupId());
 
-			Portlet portlet = PortletLocalServiceUtil.getPortletById(
+			/*Portlet portlet = PortletLocalServiceUtil.getPortletById(
 				themeDisplay.getCompanyId(), portletId);
 
 			String controlPanelEntryCategory =
-				portlet.getControlPanelEntryCategory();
+				portlet.getControlPanelEntryCategory();*/
 
-			if (!controlPanelEntryCategory.startsWith(
-					LayoutConstants.TYPE_CONTROL_PANEL)) {
+			if (!PortalUtil.isControlPanelPortlet(
+					portletId, "control_panel.", themeDisplay) &&
+				!PortalUtil.isControlPanelPortlet(
+					portletId, "user.my_account", themeDisplay)) {
 
 				throw new NoSuchGroupException();
 			}
