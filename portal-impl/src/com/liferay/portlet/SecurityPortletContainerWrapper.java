@@ -369,8 +369,11 @@ public class SecurityPortletContainerWrapper implements PortletContainer {
 
 		try {
 			if (portletContent != null) {
+				HttpServletRequest originalRequest =
+					PortalUtil.getOriginalServletRequest(request);
+
 				RequestDispatcher requestDispatcher =
-					request.getRequestDispatcher(portletContent);
+					originalRequest.getRequestDispatcher(portletContent);
 
 				requestDispatcher.include(request, response);
 			}
