@@ -130,7 +130,8 @@ value
 	: (ASCII_LATIN1 | UTF | COLON | DOT)+
 	;
 values
-	: value (equal value)*
+	: BLANK
+	| value (equal value)*
 	;
 
 attributeDescription
@@ -155,6 +156,7 @@ fragment ASCII_LETTER
 fragment DIGIT:  '0'..'9';
 fragment DASH: '-';
 
+BLANK: '';
 DOT: '.';
 COLON: ':';
 UTF: '\u0080'..'\ufffe';
