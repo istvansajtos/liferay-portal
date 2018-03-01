@@ -185,13 +185,6 @@ public class LegacyAlgorithmAwarePasswordEncryptorTest {
 		testEncryptDisabled(PasswordEncryptorUtil.TYPE_SSHA);
 	}
 
-	@Test
-	public void testEncryptUFCCRYPT() throws Exception {
-		testEncrypt(PasswordEncryptorUtil.TYPE_CRYPT, "2lrTlR/pWPUOQ");
-
-		testEncryptDisabled(PasswordEncryptorUtil.TYPE_CRYPT);
-	}
-
 	protected String getAlgorithmHeader(String encryptedPassword) {
 		int index = encryptedPassword.indexOf(CharPool.CLOSE_CURLY_BRACE);
 

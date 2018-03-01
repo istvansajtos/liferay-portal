@@ -243,15 +243,6 @@ public class CompositePasswordEncryptorTest extends PowerMockito {
 			algorithm, "password", "2EWEKeVpSdd79PkTX5vaGXH5uQ028Smy/H1NmA==");
 	}
 
-	@Test
-	public void testEncryptUFCCRYPT() throws Exception {
-		String algorithm = PasswordEncryptorUtil.TYPE_CRYPT;
-
-		testEncrypt(algorithm);
-
-		testEncrypt(algorithm, "password", "2lrTlR/pWPUOQ");
-	}
-
 	protected void testEncrypt(String algorithm) throws Exception {
 		String password = "password";
 
