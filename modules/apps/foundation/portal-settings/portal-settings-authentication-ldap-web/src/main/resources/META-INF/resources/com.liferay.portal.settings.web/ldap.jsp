@@ -61,7 +61,7 @@ boolean ldapExportEnabled = !(ldapImportConfiguration.importUserPasswordAutogene
 		<aui:option label="sha-256" value="<%= LDAPSettingsConstants.SHA_256 %>" />
 		<aui:option label="sha-384" value="<%= LDAPSettingsConstants.SHA_384 %>" />
 		<aui:option label="ssha" value="<%= LDAPSettingsConstants.SSHA %>" />
-		<aui:option label="ufc-crypt" value="<%= LDAPSettingsConstants.UFC_CRYPT %>" />
+		<aui:option label="crypt" value="<%= LDAPSettingsConstants.CRYPT %>" />
 	</aui:select>
 </aui:fieldset>
 
