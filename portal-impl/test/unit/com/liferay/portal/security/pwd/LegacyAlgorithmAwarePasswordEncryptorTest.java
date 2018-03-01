@@ -88,9 +88,9 @@ public class LegacyAlgorithmAwarePasswordEncryptorTest {
 
 	@Test
 	public void testEncryptCrypt() throws Exception {
-		testEncrypt(PasswordEncryptorUtil.TYPE_UFC_CRYPT, "SNbUMVY9kKQpY");
+		testEncrypt(PasswordEncryptorUtil.TYPE_CRYPT, "SNbUMVY9kKQpY");
 
-		testEncryptDisabled(PasswordEncryptorUtil.TYPE_UFC_CRYPT);
+		testEncryptDisabled(PasswordEncryptorUtil.TYPE_CRYPT);
 	}
 
 	@Test
@@ -187,9 +187,9 @@ public class LegacyAlgorithmAwarePasswordEncryptorTest {
 
 	@Test
 	public void testEncryptUFCCRYPT() throws Exception {
-		testEncrypt(PasswordEncryptorUtil.TYPE_UFC_CRYPT, "2lrTlR/pWPUOQ");
+		testEncrypt(PasswordEncryptorUtil.TYPE_CRYPT, "2lrTlR/pWPUOQ");
 
-		testEncryptDisabled(PasswordEncryptorUtil.TYPE_UFC_CRYPT);
+		testEncryptDisabled(PasswordEncryptorUtil.TYPE_CRYPT);
 	}
 
 	protected String getAlgorithmHeader(String encryptedPassword) {

@@ -101,7 +101,7 @@ public class CompositePasswordEncryptorTest extends PowerMockito {
 
 	@Test
 	public void testEncryptCRYPT() throws Exception {
-		String algorithm = PasswordEncryptorUtil.TYPE_UFC_CRYPT;
+		String algorithm = PasswordEncryptorUtil.TYPE_CRYPT;
 
 		testEncrypt(algorithm);
 
@@ -245,7 +245,7 @@ public class CompositePasswordEncryptorTest extends PowerMockito {
 
 	@Test
 	public void testEncryptUFCCRYPT() throws Exception {
-		String algorithm = PasswordEncryptorUtil.TYPE_UFC_CRYPT;
+		String algorithm = PasswordEncryptorUtil.TYPE_CRYPT;
 
 		testEncrypt(algorithm);
 
