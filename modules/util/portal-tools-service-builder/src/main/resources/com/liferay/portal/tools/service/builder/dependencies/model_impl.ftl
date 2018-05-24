@@ -1268,13 +1268,17 @@ public class ${entity.name}ModelImpl extends BaseModelImpl<${entity.name}> imple
 
 		@Override
 		public void prepareLocalizedFieldsForImport() throws LocaleException {
-			Locale defaultLocale = LocaleUtil.fromLanguageId(getDefaultLanguageId());
+			<#if entity.hasCompoundPK()>
+				prepareLocalizedFieldsForImport(null);
+			<#else>
+				Locale defaultLocale = LocaleUtil.fromLanguageId(getDefaultLanguageId());
 
-			Locale[] availableLocales = LocaleUtil.fromLanguageIds(getAvailableLanguageIds());
+				Locale[] availableLocales = LocaleUtil.fromLanguageIds(getAvailableLanguageIds());
 
-			Locale defaultImportLocale = LocalizationUtil.getDefaultImportLocale(${entity.name}.class.getName(), getPrimaryKey(), defaultLocale, availableLocales);
+				Locale defaultImportLocale = LocalizationUtil.getDefaultImportLocale(${entity.name}.class.getName(), getPrimaryKey(), defaultLocale, availableLocales);
 
-			prepareLocalizedFieldsForImport(defaultImportLocale);
+				prepareLocalizedFieldsForImport(defaultImportLocale);
+			</#if>
 		}
 
 		@Override
