@@ -1111,11 +1111,16 @@ public abstract class BaseIndexer<T> implements Indexer<T> {
 
 		queries.put(field, query);
 
-		long groupId = Long.valueOf(
-			(String)searchContext.getAttribute("groupId"));
+		Set<Locale> availableLocales;
 
-		Set<Locale> availableLocales = LanguageUtil.getAvailableLocales(
-			groupId);
+		Long groupId = (Long)searchContext.getAttribute("groupId");
+
+		if (groupId == null) {
+			availableLocales = LanguageUtil.getAvailableLocales();
+		}
+		else {
+			availableLocales = LanguageUtil.getAvailableLocales(groupId);
+		}
 
 		for (Locale locale : availableLocales) {
 			String localizedFieldName = Field.getLocalizedName(locale, field);
