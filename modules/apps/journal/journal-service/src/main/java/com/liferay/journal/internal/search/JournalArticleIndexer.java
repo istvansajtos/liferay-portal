@@ -416,11 +416,16 @@ public class JournalArticleIndexer
 			return Collections.emptyMap();
 		}
 
-		long groupId = Long.valueOf(
-			(String)searchContext.getAttribute("groupId"));
+		Set<Locale> availableLocales;
 
-		Set<Locale> availableLocales = LanguageUtil.getAvailableLocales(
-			groupId);
+		Long groupId = (Long)searchContext.getAttribute("groupId");
+
+		if (groupId == null) {
+			availableLocales = LanguageUtil.getAvailableLocales();
+		}
+		else {
+			availableLocales = LanguageUtil.getAvailableLocales(groupId);
+		}
 
 		Map<String, Query> queries = new HashMap<>();
 
