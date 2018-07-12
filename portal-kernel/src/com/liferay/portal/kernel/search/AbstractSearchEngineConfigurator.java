@@ -39,10 +39,12 @@ import com.liferay.portal.kernel.util.Validator;
 import com.liferay.registry.Registry;
 import com.liferay.registry.RegistryUtil;
 import com.liferay.registry.ServiceReference;
+import com.liferay.registry.ServiceRegistrar;
 import com.liferay.registry.dependency.ServiceDependencyListener;
 import com.liferay.registry.dependency.ServiceDependencyManager;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -384,6 +386,17 @@ public abstract class AbstractSearchEngineConfigurator
 		Destination destination,
 		BaseSearchEngineMessageListener baseSearchEngineMessageListener,
 		Object manager) {
+
+		Registry registry = RegistryUtil.getRegistry();
+
+		ServiceRegistrar<Destination> destinationServiceRegistrar = registry.getServiceRegistrar(Destination.class);
+
+		Map<String, Object> properties = new HashMap<>();
+
+		properties.put("destination.name", destination.getName());
+
+		destinationServiceRegistrar.registerService(
+			Destination.class, destination, properties);
 
 		baseSearchEngineMessageListener.setManager(manager);
 		baseSearchEngineMessageListener.setMessageBus(_messageBus);
