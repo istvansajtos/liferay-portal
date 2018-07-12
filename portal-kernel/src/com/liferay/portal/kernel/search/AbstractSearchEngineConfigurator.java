@@ -320,11 +320,15 @@ public abstract class AbstractSearchEngineConfigurator
 		Destination searchReaderDestination = getSearchReaderDestination(
 			_messageBus, searchEngineId);
 
+		registerSearchEngineDestination(searchReaderDestination);
+
 		searchEngineRegistration.setSearchReaderDestinationName(
 			searchReaderDestination.getName());
 
 		Destination searchWriterDestination = getSearchWriterDestination(
 			_messageBus, searchEngineId);
+
+		registerSearchEngineDestination(searchWriterDestination);
 
 		searchEngineRegistration.setSearchWriterDestinationName(
 			searchWriterDestination.getName());
@@ -381,12 +385,7 @@ public abstract class AbstractSearchEngineConfigurator
 		}
 	}
 
-	protected void registerSearchEngineMessageListener(
-		String searchEngineId, SearchEngine searchEngine,
-		Destination destination,
-		BaseSearchEngineMessageListener baseSearchEngineMessageListener,
-		Object manager) {
-
+	protected void registerSearchEngineDestination(Destination destination) {
 		Registry registry = RegistryUtil.getRegistry();
 
 		ServiceRegistrar<Destination> destinationServiceRegistrar = registry.getServiceRegistrar(Destination.class);
@@ -397,6 +396,13 @@ public abstract class AbstractSearchEngineConfigurator
 
 		destinationServiceRegistrar.registerService(
 			Destination.class, destination, properties);
+	}
+
+	protected void registerSearchEngineMessageListener(
+		String searchEngineId, SearchEngine searchEngine,
+		Destination destination,
+		BaseSearchEngineMessageListener baseSearchEngineMessageListener,
+		Object manager) {
 
 		baseSearchEngineMessageListener.setManager(manager);
 		baseSearchEngineMessageListener.setMessageBus(_messageBus);
