@@ -566,7 +566,7 @@ public class UserGroupLocalServiceImpl extends UserGroupLocalServiceBaseImpl {
 		int start, int end, OrderByComparator<UserGroup> obc) {
 
 		if (isUseCustomSQL(params)) {
-			return userGroupFinder.filterFindByKeywords(
+			return userGroupFinder.findByKeywords(
 				companyId, keywords, params, start, end, obc);
 		}
 
@@ -681,7 +681,7 @@ public class UserGroupLocalServiceImpl extends UserGroupLocalServiceBaseImpl {
 		int end, OrderByComparator<UserGroup> obc) {
 
 		if (isUseCustomSQL(params)) {
-			return userGroupFinder.filterFindByC_N_D(
+			return userGroupFinder.findByC_N_D(
 				companyId, name, description, params, andOperator, start, end,
 				obc);
 		}
