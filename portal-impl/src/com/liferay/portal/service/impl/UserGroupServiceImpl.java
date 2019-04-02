@@ -314,66 +314,12 @@ public class UserGroupServiceImpl extends UserGroupServiceBaseImpl {
 			UserGroup.class, orderByCol, orderByType);
 
 		try {
-			return UsersAdminUtil.getUserGroups(
-				search(companyId, keywords, params, start, end, sort));
+			return UsersAdminUtil.getUserGroups(userGroupLocalService.search(
+				companyId, keywords, params, start, end, sort));
 		}
 		catch (Exception e) {
 			throw new SystemException(e);
 		}
-	}
-
-	/**
-	 * Returns an ordered range of all the user groups that match the keywords,
-	 * using the indexer. It is preferable to use this method instead of the
-	 * non-indexed version whenever possible for performance reasons.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end -
-	 * start</code> instances. <code>start</code> and <code>end</code> are not
-	 * primary keys, they are indexes in the result set. Thus, <code>0</code>
-	 * refers to the first result in the set. Setting both <code>start</code>
-	 * and <code>end</code> to {@link QueryUtil#ALL_POS} will return the full
-	 * result set.
-	 * </p>
-	 *
-	 * @param  companyId the primary key of the user group's company
-	 * @param  keywords the keywords (space separated), which may occur in the
-	 *         user group's name or description (optionally <code>null</code>)
-	 * @param  params the finder params (optionally <code>null</code>). For more
-	 *         information see {@link
-	 *         com.liferay.user.groups.admin.web.search.UserGroupIndexer}
-	 * @param  start the lower bound of the range of user groups to return
-	 * @param  end the upper bound of the range of user groups to return (not
-	 *         inclusive)
-	 * @param  sort the field and direction by which to sort (optionally
-	 *         <code>null</code>)
-	 * @return the matching user groups ordered by sort
-	 * @see    com.liferay.user.groups.admin.web.search.UserGroupIndexer
-	 */
-	@Override
-	public Hits search(
-		long companyId, String keywords, LinkedHashMap<String, Object> params,
-		int start, int end, Sort sort) {
-
-		String name = null;
-		String description = null;
-		boolean andOperator = false;
-
-		if (Validator.isNotNull(keywords)) {
-			name = keywords;
-			description = keywords;
-		}
-		else {
-			andOperator = true;
-		}
-
-		if (params != null) {
-			params.put("keywords", keywords);
-		}
-
-		return userGroupLocalService.search(
-			companyId, name, description, params, andOperator, start, end,
-			sort);
 	}
 
 	/**
@@ -461,35 +407,7 @@ public class UserGroupServiceImpl extends UserGroupServiceBaseImpl {
 				companyId, keywords, params);
 		}
 
-		String name = null;
-		String description = null;
-		boolean andOperator = false;
-
-		if (Validator.isNotNull(keywords)) {
-			name = keywords;
-			description = keywords;
-		}
-		else {
-			andOperator = true;
-		}
-
-		if (params != null) {
-			params.put("keywords", keywords);
-		}
-
-		try {
-			SearchContext searchContext = buildSearchContext(
-				companyId, name, description, params, andOperator,
-				QueryUtil.ALL_POS, QueryUtil.ALL_POS, null);
-
-			Indexer<?> indexer = IndexerRegistryUtil.nullSafeGetIndexer(
-				UserGroup.class);
-
-			return (int)indexer.searchCount(searchContext);
-		}
-		catch (Exception e) {
-			throw new SystemException(e);
-		}
+		return userGroupLocalService.searchCount(companyId, keywords, params);
 	}
 
 	/**
@@ -517,19 +435,8 @@ public class UserGroupServiceImpl extends UserGroupServiceBaseImpl {
 				companyId, name, description, params, andOperator);
 		}
 
-		try {
-			SearchContext searchContext = buildSearchContext(
-				companyId, name, description, params, true, QueryUtil.ALL_POS,
-				QueryUtil.ALL_POS, null);
-
-			Indexer<?> indexer = IndexerRegistryUtil.nullSafeGetIndexer(
-				UserGroup.class);
-
-			return (int)indexer.searchCount(searchContext);
-		}
-		catch (Exception e) {
-			throw new SystemException(e);
-		}
+		return userGroupLocalService.searchCount(
+			companyId, name, description, params, andOperator);
 	}
 
 	/**
