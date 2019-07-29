@@ -51,6 +51,19 @@ public class AssetEntryFinderUtil {
 		return getFinder().findPriorityByC_C(classNameId, classPK);
 	}
 
+	public static void cacheResult(
+		com.liferay.asset.kernel.model.AssetEntry assetEntry) {
+
+		getFinder().cacheResult(assetEntry);
+	}
+
+	public static void cacheResult(
+		java.util.List<com.liferay.asset.kernel.model.AssetEntry>
+			assetEntries) {
+
+		getFinder().cacheResult(assetEntries);
+	}
+
 	public static AssetEntryFinder getFinder() {
 		if (_finder == null) {
 			_finder = (AssetEntryFinder)PortalBeanLocatorUtil.locate(

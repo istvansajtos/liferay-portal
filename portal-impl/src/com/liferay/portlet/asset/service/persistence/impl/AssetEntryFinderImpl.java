@@ -20,6 +20,9 @@ import com.liferay.asset.kernel.service.AssetCategoryLocalServiceUtil;
 import com.liferay.asset.kernel.service.persistence.AssetEntryFinder;
 import com.liferay.asset.kernel.service.persistence.AssetEntryQuery;
 import com.liferay.petra.string.StringPool;
+import com.liferay.portal.kernel.dao.orm.EntityCacheUtil;
+import com.liferay.portal.kernel.dao.orm.FinderCacheUtil;
+import com.liferay.portal.kernel.dao.orm.FinderPath;
 import com.liferay.portal.kernel.dao.orm.QueryPos;
 import com.liferay.portal.kernel.dao.orm.QueryUtil;
 import com.liferay.portal.kernel.dao.orm.SQLQuery;
@@ -36,6 +39,7 @@ import com.liferay.portal.kernel.util.StringUtil;
 import com.liferay.portal.kernel.util.Validator;
 import com.liferay.portal.util.PropsValues;
 import com.liferay.portlet.asset.model.impl.AssetEntryImpl;
+import com.liferay.portlet.asset.model.impl.AssetEntryModelImpl;
 import com.liferay.portlet.documentlibrary.service.persistence.impl.DLFileEntryFinderImpl;
 import com.liferay.portlet.documentlibrary.service.persistence.impl.DLFolderFinderImpl;
 import com.liferay.util.dao.orm.CustomSQLUtil;
@@ -67,6 +71,39 @@ public class AssetEntryFinderImpl
 
 	public static final String FIND_PRIORITY_BY_C_C =
 		AssetEntryFinder.class.getName() + ".findPriorityByC_C";
+
+	/**
+	 * Caches the asset entry in the entity cache if it is enabled.
+	 *
+	 * @param assetEntry the asset entry
+	 */
+	public void cacheResult(AssetEntry assetEntry) {
+		EntityCacheUtil.putResult(
+			AssetEntryModelImpl.ENTITY_CACHE_ENABLED, AssetEntryImpl.class,
+			assetEntry.getPrimaryKey(), assetEntry);
+
+		assetEntry.resetOriginalValues();
+	}
+
+	/**
+	 * Caches the asset entries in the entity cache if it is enabled.
+	 *
+	 * @param assetEntries the asset entries
+	 */
+	public void cacheResult(List<AssetEntry> assetEntries) {
+		for (AssetEntry assetEntry : assetEntries) {
+			AssetEntry cacheEntry = (AssetEntry)EntityCacheUtil.getResult(
+				AssetEntryModelImpl.ENTITY_CACHE_ENABLED, AssetEntryImpl.class,
+				assetEntry.getPrimaryKey());
+
+			if (cacheEntry == null) {
+				cacheResult(assetEntry);
+			}
+			else {
+				assetEntry.resetOriginalValues();
+			}
+		}
+	}
 
 	@Override
 	public int countEntries(AssetEntryQuery entryQuery) {
@@ -182,22 +219,55 @@ public class AssetEntryFinderImpl
 
 	@Override
 	public List<AssetEntry> findEntries(AssetEntryQuery entryQuery) {
-		Session session = null;
+		FinderPath finderPath = _finderPathFindEntries;
 
-		try {
-			session = openSession();
+		Object[] finderArgs = {
+			entryQuery.getAllCategoryIds(), entryQuery.getAllTagIds(),
+			entryQuery.isAndOperator(), entryQuery.getAnyCategoryIds(),
+			entryQuery.getAnyTagIds(), entryQuery.getClassNameIds(),
+			entryQuery.getClassTypeIds(), entryQuery.getDescription(),
+			entryQuery.getEnd(), entryQuery.isExcludeZeroViewCount(),
+			entryQuery.getGroupIds(), entryQuery.getKeywords(),
+			entryQuery.getLinkedAssetEntryId(), entryQuery.isListable(),
+			entryQuery.getNotAllCategoryIds(), entryQuery.getNotAllTagIds(),
+			entryQuery.getNotAnyCategoryIds(), entryQuery.getNotAllTagIds(),
+			entryQuery.getOrderByCol1(), entryQuery.getOrderByCol2(),
+			entryQuery.getOrderByType1(), entryQuery.getOrderByType2(),
+			entryQuery.getPaginationType(), entryQuery.getStart(),
+			entryQuery.getTitle(), entryQuery.getUserName(),
+			entryQuery.isVisible()
+		};
 
-			SQLQuery q = buildAssetQuerySQL(entryQuery, false, session);
+		List<AssetEntry> list = (List<AssetEntry>)FinderCacheUtil.getResult(
+			finderPath, finderArgs, this);
 
-			return (List<AssetEntry>)QueryUtil.list(
-				q, getDialect(), entryQuery.getStart(), entryQuery.getEnd());
+		if (list == null) {
+			Session session = null;
+
+			try {
+				session = openSession();
+
+				SQLQuery q = buildAssetQuerySQL(entryQuery, false, session);
+
+				list = (List<AssetEntry>)QueryUtil.list(
+					q, getDialect(), entryQuery.getStart(),
+					entryQuery.getEnd());
+
+				cacheResult(list);
+
+				FinderCacheUtil.putResult(finderPath, finderArgs, list);
+			}
+			catch (Exception e) {
+				FinderCacheUtil.removeResult(finderPath, finderArgs);
+
+				throw new SystemException(e);
+			}
+			finally {
+				closeSession(session);
+			}
 		}
-		catch (Exception e) {
-			throw new SystemException(e);
-		}
-		finally {
-			closeSession(session);
-		}
+
+		return list;
 	}
 
 	@Override
@@ -866,5 +936,11 @@ public class AssetEntryFinderImpl
 			qPos.add(expirationDate_TS);
 		}
 	}
+
+	private final FinderPath _finderPathFindEntries = new FinderPath(
+		AssetEntryModelImpl.ENTITY_CACHE_ENABLED,
+		AssetEntryModelImpl.FINDER_CACHE_ENABLED, AssetEntryImpl.class,
+		AssetEntryImpl.class.getName() + ".findEntries", "findEntries",
+		new String[] {AssetEntry.class.getName()});
 
 }

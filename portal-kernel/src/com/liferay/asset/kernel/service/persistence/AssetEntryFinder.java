@@ -36,4 +36,10 @@ public interface AssetEntryFinder {
 
 	public double findPriorityByC_C(long classNameId, long classPK);
 
+	public void cacheResult(
+		com.liferay.asset.kernel.model.AssetEntry assetEntry);
+
+	public void cacheResult(
+		java.util.List<com.liferay.asset.kernel.model.AssetEntry> assetEntries);
+
 }
