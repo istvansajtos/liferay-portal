@@ -1055,73 +1055,68 @@ public class LDAPUserImporterImpl implements LDAPUserImporter, UserImporter {
 
 		UserImportTransactionThreadLocal.setOriginatesFromImport(true);
 
-		try {
-			userLdapAttribtes = _attributesTransformer.transformUser(
-				userLdapAttribtes);
+		userLdapAttribtes = _attributesTransformer.transformUser(
+			userLdapAttribtes);
 
-			LDAPUser ldapUser = _ldapToPortalConverter.importLDAPUser(
-				ldapImportContext.getCompanyId(), userLdapAttribtes,
-				ldapImportContext.getUserMappings(),
-				ldapImportContext.getUserExpandoMappings(),
-				ldapImportContext.getContactMappings(),
-				ldapImportContext.getContactExpandoMappings(), password);
+		LDAPUser ldapUser = _ldapToPortalConverter.importLDAPUser(
+			ldapImportContext.getCompanyId(), userLdapAttribtes,
+			ldapImportContext.getUserMappings(),
+			ldapImportContext.getUserExpandoMappings(),
+			ldapImportContext.getContactMappings(),
+			ldapImportContext.getContactExpandoMappings(), password);
 
-			User user = getUser(ldapImportContext.getCompanyId(), ldapUser);
+		User user = getUser(ldapImportContext.getCompanyId(), ldapUser);
 
-			if ((user != null) && user.isDefaultUser()) {
-				return user;
-			}
-
-			ServiceContext serviceContext = ldapUser.getServiceContext();
-
-			serviceContext.setAttribute(
-				"ldapServerId", ldapImportContext.getLdapServerId());
-
-			boolean isNew = false;
-
-			if (user == null) {
-				user = addUser(
-					ldapImportContext.getCompanyId(), ldapUser, password);
-
-				isNew = true;
-			}
-
-			String modifyTimestamp = LDAPUtil.getAttributeString(
-				userLdapAttribtes, "modifyTimestamp");
-
-			try {
-				user = updateUser(
-					ldapImportContext, ldapUser, user, password,
-					modifyTimestamp, isNew);
-
-				updateExpandoAttributes(ldapImportContext, user, ldapUser);
-
-				ldapImportContext.addImportedUserId(
-					fullUserDN, user.getUserId());
-			}
-			catch (GroupFriendlyURLException gfurle) {
-				int type = gfurle.getType();
-
-				if (type == GroupFriendlyURLException.DUPLICATE) {
-					_log.error(
-						"Unable to import user " + user.getUserId() +
-							" because of a duplicate group friendly URL",
-						gfurle);
-				}
-				else {
-					_log.error(
-						"Unable to import user " + user.getUserId(), gfurle);
-				}
-			}
-			catch (Exception e) {
-				_log.error("Unable to import user " + user.getUserId(), e);
-			}
-
+		if ((user != null) && user.isDefaultUser()) {
 			return user;
 		}
-		finally {
-			UserImportTransactionThreadLocal.setOriginatesFromImport(false);
+
+		ServiceContext serviceContext = ldapUser.getServiceContext();
+
+		serviceContext.setAttribute(
+			"ldapServerId", ldapImportContext.getLdapServerId());
+
+		boolean isNew = false;
+
+		if (user == null) {
+			user = addUser(
+				ldapImportContext.getCompanyId(), ldapUser, password);
+
+			isNew = true;
 		}
+
+		String modifyTimestamp = LDAPUtil.getAttributeString(
+			userLdapAttribtes, "modifyTimestamp");
+
+		try {
+			user = updateUser(
+				ldapImportContext, ldapUser, user, password,
+				modifyTimestamp, isNew);
+
+			updateExpandoAttributes(ldapImportContext, user, ldapUser);
+
+			ldapImportContext.addImportedUserId(
+				fullUserDN, user.getUserId());
+		}
+		catch (GroupFriendlyURLException gfurle) {
+			int type = gfurle.getType();
+
+			if (type == GroupFriendlyURLException.DUPLICATE) {
+				_log.error(
+					"Unable to import user " + user.getUserId() +
+						" because of a duplicate group friendly URL",
+					gfurle);
+			}
+			else {
+				_log.error(
+					"Unable to import user " + user.getUserId(), gfurle);
+			}
+		}
+		catch (Exception e) {
+			_log.error("Unable to import user " + user.getUserId(), e);
+		}
+
+		return user;
 	}
 
 	protected UserGroup importUserGroup(
@@ -1192,10 +1187,6 @@ public class LDAPUserImporterImpl implements LDAPUserImporter, UserImporter {
 				if (_log.isDebugEnabled()) {
 					_log.debug(e, e);
 				}
-			}
-			finally {
-				UserGroupImportTransactionThreadLocal.setOriginatesFromImport(
-					false);
 			}
 		}
 
