@@ -1053,8 +1053,6 @@ public class LDAPUserImporterImpl implements LDAPUserImporter, UserImporter {
 			Attributes userLdapAttribtes, String password)
 		throws Exception {
 
-		UserImportTransactionThreadLocal.setOriginatesFromImport(true);
-
 		userLdapAttribtes = _attributesTransformer.transformUser(
 			userLdapAttribtes);
 
@@ -1081,6 +1079,8 @@ public class LDAPUserImporterImpl implements LDAPUserImporter, UserImporter {
 		if (user == null) {
 			user = addUser(
 				ldapImportContext.getCompanyId(), ldapUser, password);
+
+			UserImportTransactionThreadLocal.setOriginatesFromImport(true);
 
 			isNew = true;
 		}
