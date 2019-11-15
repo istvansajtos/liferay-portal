@@ -86,10 +86,8 @@ public class AuthenticatedSessionManagerImpl
 			String password, boolean rememberMe, String authType)
 		throws Exception {
 
-		httpServletRequest = PortalUtil.getOriginalServletRequest(
+		String queryString = PortalUtil.getOriginalQueryString(
 			httpServletRequest);
-
-		String queryString = httpServletRequest.getQueryString();
 
 		if (Validator.isNotNull(queryString) &&
 			queryString.contains("password=")) {
