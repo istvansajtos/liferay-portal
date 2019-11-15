@@ -818,6 +818,16 @@ public interface Portal {
 	public String getNewPortletTitle(
 		String portletTitle, String oldScopeName, String newScopeName);
 
+	public String getOriginalContextPath(HttpServletRequest httpServletRequest);
+
+	public String getOriginalPathInfo(HttpServletRequest httpServletRequest);
+
+	public String getOriginalQueryString(HttpServletRequest httpServletRequest);
+
+	public String getOriginalRequestURI(HttpServletRequest httpServletRequest);
+
+	public String getOriginalServletPath(HttpServletRequest httpServletRequest);
+
 	public HttpServletRequest getOriginalServletRequest(
 		HttpServletRequest httpServletRequest);
 

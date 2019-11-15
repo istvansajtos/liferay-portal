@@ -1222,6 +1222,36 @@ public class PortalUtil {
 			portletTitle, oldScopeName, newScopeName);
 	}
 
+	public static String getOriginalContextPath(
+		HttpServletRequest httpServletRequest) {
+
+		return getPortal().getOriginalContextPath(httpServletRequest);
+	}
+
+	public static String getOriginalPathInfo(
+		HttpServletRequest httpServletRequest) {
+
+		return getPortal().getOriginalPathInfo(httpServletRequest);
+	}
+
+	public static String getOriginalQueryString(
+		HttpServletRequest httpServletRequest) {
+
+		return getPortal().getOriginalQueryString(httpServletRequest);
+	}
+
+	public static String getOriginalRequestURI(
+		HttpServletRequest httpServletRequest) {
+
+		return getPortal().getOriginalRequestURI(httpServletRequest);
+	}
+
+	public static String getOriginalServletPath(
+		HttpServletRequest httpServletRequest) {
+
+		return getPortal().getOriginalServletPath(httpServletRequest);
+	}
+
 	public static HttpServletRequest getOriginalServletRequest(
 		HttpServletRequest httpServletRequest) {
 

@@ -3667,6 +3667,62 @@ public class PortalImpl implements Portal {
 	}
 
 	@Override
+	public String getOriginalContextPath(
+		HttpServletRequest httpServletRequest) {
+
+		if (_isForwarded(httpServletRequest)) {
+			return (String)httpServletRequest.getAttribute(
+				JavaConstants.JAVAX_SERVLET_FORWARD_CONTEXT_PATH);
+		}
+
+		return httpServletRequest.getContextPath();
+	}
+
+	@Override
+	public String getOriginalPathInfo(HttpServletRequest httpServletRequest) {
+		if (_isForwarded(httpServletRequest)) {
+			return (String)httpServletRequest.getAttribute(
+				JavaConstants.JAVAX_SERVLET_FORWARD_PATH_INFO);
+		}
+
+		return httpServletRequest.getPathInfo();
+	}
+
+	@Override
+	public String getOriginalQueryString(
+		HttpServletRequest httpServletRequest) {
+
+		if (_isForwarded(httpServletRequest)) {
+			return (String)httpServletRequest.getAttribute(
+				JavaConstants.JAVAX_SERVLET_FORWARD_QUERY_STRING);
+		}
+
+		return httpServletRequest.getQueryString();
+	}
+
+	@Override
+	public String getOriginalRequestURI(HttpServletRequest httpServletRequest) {
+		if (_isForwarded(httpServletRequest)) {
+			return (String)httpServletRequest.getAttribute(
+				JavaConstants.JAVAX_SERVLET_FORWARD_REQUEST_URI);
+		}
+
+		return httpServletRequest.getRequestURI();
+	}
+
+	@Override
+	public String getOriginalServletPath(
+		HttpServletRequest httpServletRequest) {
+
+		if (_isForwarded(httpServletRequest)) {
+			return (String)httpServletRequest.getAttribute(
+				JavaConstants.JAVAX_SERVLET_FORWARD_SERVLET_PATH);
+		}
+
+		return httpServletRequest.getServletPath();
+	}
+
+	@Override
 	public HttpServletRequest getOriginalServletRequest(
 		HttpServletRequest httpServletRequest) {
 
@@ -8616,6 +8672,16 @@ public class PortalImpl implements Portal {
 		}
 
 		return group;
+	}
+
+	private boolean _isForwarded(HttpServletRequest httpServletRequest) {
+		if (httpServletRequest.getAttribute(
+				JavaConstants.JAVAX_SERVLET_FORWARD_REQUEST_URI) != null) {
+
+			return true;
+		}
+
+		return false;
 	}
 
 	private static final Log _logWebServerServlet = LogFactoryUtil.getLog(
