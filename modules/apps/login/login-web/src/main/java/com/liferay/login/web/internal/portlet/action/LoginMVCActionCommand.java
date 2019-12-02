@@ -188,6 +188,9 @@ public class LoginMVCActionCommand extends BaseMVCActionCommand {
 		HttpServletRequest httpServletRequest = _portal.getHttpServletRequest(
 			actionRequest);
 
+		httpServletRequest = _portal.getOriginalServletRequest(
+			_portal.getHttpServletRequest(actionRequest));
+
 		if (!themeDisplay.isSignedIn()) {
 			HttpServletResponse httpServletResponse =
 				_portal.getHttpServletResponse(actionResponse);
