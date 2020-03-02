@@ -1889,6 +1889,10 @@ public class PortalUtil {
 		return getPortal().isCustomPortletMode(portletMode);
 	}
 
+	public static boolean isForwarded(HttpServletRequest httpServletRequest) {
+		return getPortal().isForwarded(httpServletRequest);
+	}
+
 	public static boolean isForwardedSecure(
 		HttpServletRequest httpServletRequest) {
 
