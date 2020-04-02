@@ -523,13 +523,15 @@ public class ContentPageEditorDisplayContext {
 
 		List<Map<String, Object>> sidebarPanels = new ArrayList<>();
 
+		Layout publishedLayout = _getPublishedLayout();
+
 		for (ContentPageEditorSidebarPanel contentPageEditorSidebarPanel :
 				_contentPageEditorSidebarPanels) {
 
 			if (!contentPageEditorSidebarPanel.isVisible(pageIsDisplayPage) ||
 				!contentPageEditorSidebarPanel.isVisible(
-					themeDisplay.getPermissionChecker(), themeDisplay.getPlid(),
-					pageIsDisplayPage)) {
+					themeDisplay.getPermissionChecker(),
+					publishedLayout.getPlid(), pageIsDisplayPage)) {
 
 				continue;
 			}
@@ -1724,8 +1726,11 @@ public class ContentPageEditorDisplayContext {
 
 	private boolean _hasUpdateContentPermissions() {
 		try {
+			Layout publishedLayout = _getPublishedLayout();
+
 			if (LayoutPermissionUtil.contains(
-					themeDisplay.getPermissionChecker(), themeDisplay.getPlid(),
+					themeDisplay.getPermissionChecker(),
+					publishedLayout.getPlid(),
 					ActionKeys.UPDATE_LAYOUT_CONTENT)) {
 
 				return true;
@@ -1742,8 +1747,11 @@ public class ContentPageEditorDisplayContext {
 
 	private boolean _hasUpdatePermissions() {
 		try {
+			Layout publishedLayout = _getPublishedLayout();
+
 			if (LayoutPermissionUtil.contains(
-					themeDisplay.getPermissionChecker(), themeDisplay.getPlid(),
+					themeDisplay.getPermissionChecker(),
+					publishedLayout.getPlid(),
 					ActionKeys.UPDATE)) {
 
 				return true;
