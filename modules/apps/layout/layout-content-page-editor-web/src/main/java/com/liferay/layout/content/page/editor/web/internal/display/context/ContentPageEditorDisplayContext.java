@@ -520,13 +520,15 @@ public class ContentPageEditorDisplayContext {
 
 		List<Map<String, Object>> sidebarPanels = new ArrayList<>();
 
+		Layout publishedLayout = _getPublishedLayout();
+
 		for (ContentPageEditorSidebarPanel contentPageEditorSidebarPanel :
 				_contentPageEditorSidebarPanels) {
 
 			if (!contentPageEditorSidebarPanel.isVisible(pageIsDisplayPage) ||
 				!contentPageEditorSidebarPanel.isVisible(
-					themeDisplay.getPermissionChecker(), themeDisplay.getPlid(),
-					pageIsDisplayPage)) {
+					themeDisplay.getPermissionChecker(),
+					publishedLayout.getPlid(), pageIsDisplayPage)) {
 
 				continue;
 			}
