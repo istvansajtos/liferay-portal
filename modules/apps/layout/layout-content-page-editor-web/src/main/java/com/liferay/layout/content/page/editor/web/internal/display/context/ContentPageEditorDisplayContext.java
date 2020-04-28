@@ -420,10 +420,10 @@ public class ContentPageEditorDisplayContext {
 			).put(
 				"permissions",
 				HashMapBuilder.<String, Object>put(
-					ContentPageEditorActionKeys.UPDATE, _hasUpdatePermissions()
+					ContentPageEditorActionKeys.UPDATE, hasUpdatePermissions()
 				).put(
 					ContentPageEditorActionKeys.UPDATE_LAYOUT_CONTENT,
-					_hasUpdateContentPermissions()
+					hasUpdateContentPermissions()
 				).build()
 			).put(
 				"widgets", _getWidgets()
@@ -1724,7 +1724,7 @@ public class ContentPageEditorDisplayContext {
 		return _getWidgetCategories(portletCategory);
 	}
 
-	private boolean _hasUpdateContentPermissions() {
+	protected boolean hasUpdateContentPermissions() {
 		try {
 			Layout publishedLayout = _getPublishedLayout();
 
@@ -1745,7 +1745,7 @@ public class ContentPageEditorDisplayContext {
 		return false;
 	}
 
-	private boolean _hasUpdatePermissions() {
+	protected boolean hasUpdatePermissions() {
 		try {
 			Layout publishedLayout = _getPublishedLayout();
 

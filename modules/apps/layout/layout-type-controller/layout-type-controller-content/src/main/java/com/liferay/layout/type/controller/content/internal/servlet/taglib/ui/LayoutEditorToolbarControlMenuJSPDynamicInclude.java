@@ -14,6 +14,10 @@
 
 package com.liferay.layout.type.controller.content.internal.servlet.taglib.ui;
 
+import com.liferay.layout.content.page.editor.constants.ContentPageEditorWebKeys;
+import com.liferay.layout.page.template.constants.LayoutPageTemplateEntryTypeConstants;
+import com.liferay.layout.page.template.model.LayoutPageTemplateEntry;
+import com.liferay.layout.page.template.service.LayoutPageTemplateEntryLocalService;
 import com.liferay.layout.security.permission.resource.LayoutContentModelResourcePermission;
 import com.liferay.portal.kernel.exception.PortalException;
 import com.liferay.portal.kernel.log.Log;
@@ -21,12 +25,14 @@ import com.liferay.portal.kernel.log.LogFactoryUtil;
 import com.liferay.portal.kernel.model.Layout;
 import com.liferay.portal.kernel.model.LayoutConstants;
 import com.liferay.portal.kernel.security.permission.ActionKeys;
+import com.liferay.portal.kernel.security.permission.resource.ModelResourcePermission;
 import com.liferay.portal.kernel.service.LayoutLocalService;
 import com.liferay.portal.kernel.service.permission.LayoutPermissionUtil;
 import com.liferay.portal.kernel.servlet.taglib.BaseJSPDynamicInclude;
 import com.liferay.portal.kernel.servlet.taglib.DynamicInclude;
 import com.liferay.portal.kernel.theme.ThemeDisplay;
 import com.liferay.portal.kernel.util.Constants;
+import com.liferay.portal.kernel.util.GetterUtil;
 import com.liferay.portal.kernel.util.ParamUtil;
 import com.liferay.portal.kernel.util.WebKeys;
 
@@ -94,6 +100,24 @@ public class LayoutEditorToolbarControlMenuJSPDynamicInclude
 			return false;
 		}
 
+		if (_isDisplayPage(httpServletRequest)) {
+			long classPK = GetterUtil.getLong(
+				httpServletRequest.getAttribute(
+					ContentPageEditorWebKeys.CLASS_PK));
+
+			LayoutPageTemplateEntry layoutPageTemplateEntry =
+				_layoutPageTemplateEntryLocalService.fetchLayoutPageTemplateEntry(
+					classPK);
+
+			if (_layoutPageTemplateEntryModelResourcePermission.contains(
+					themeDisplay.getPermissionChecker(),
+					layoutPageTemplateEntry.getLayoutPageTemplateEntryId(),
+					ActionKeys.UPDATE)) {
+
+				return true;
+			}
+		}
+
 		if (!LayoutPermissionUtil.contains(
 				themeDisplay.getPermissionChecker(), layout,
 				ActionKeys.UPDATE) &&
@@ -149,6 +173,25 @@ public class LayoutEditorToolbarControlMenuJSPDynamicInclude
 		return false;
 	}
 
+	private boolean _isDisplayPage(HttpServletRequest httpServletRequest) {
+		long classPK = GetterUtil.getLong(
+			httpServletRequest.getAttribute(ContentPageEditorWebKeys.CLASS_PK));
+
+		LayoutPageTemplateEntry layoutPageTemplateEntry =
+			_layoutPageTemplateEntryLocalService.fetchLayoutPageTemplateEntry(
+				classPK);
+
+		if ((layoutPageTemplateEntry != null) &&
+			(layoutPageTemplateEntry.getType() ==
+				LayoutPageTemplateEntryTypeConstants.TYPE_DISPLAY_PAGE)) {
+
+			return true;
+		}
+
+		return false;
+	}
+	
+
 	private static final Log _log = LogFactoryUtil.getLog(
 		LayoutEditorToolbarControlMenuJSPDynamicInclude.class);
 
@@ -158,4 +201,22 @@ public class LayoutEditorToolbarControlMenuJSPDynamicInclude
 	@Reference
 	private LayoutContentModelResourcePermission _modelResourcePermission;
 
+	@Reference
+	private LayoutPageTemplateEntryLocalService
+		_layoutPageTemplateEntryLocalService;
+
+	@Reference(
+			target = "(model.class.name=com.liferay.layout.page.template.model.LayoutPageTemplateEntry)",
+			unbind = "-"
+		)
+		protected void setModelResourcePermission(
+			ModelResourcePermission<LayoutPageTemplateEntry>
+				modelResourcePermission) {
+
+			_layoutPageTemplateEntryModelResourcePermission =
+				modelResourcePermission;
+		}
+
+		private static ModelResourcePermission<LayoutPageTemplateEntry>
+			_layoutPageTemplateEntryModelResourcePermission;
 }

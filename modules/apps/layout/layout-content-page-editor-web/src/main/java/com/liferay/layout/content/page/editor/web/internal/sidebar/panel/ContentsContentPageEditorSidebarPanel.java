@@ -15,6 +15,9 @@
 package com.liferay.layout.content.page.editor.web.internal.sidebar.panel;
 
 import com.liferay.layout.content.page.editor.sidebar.panel.ContentPageEditorSidebarPanel;
+import com.liferay.layout.content.page.editor.web.internal.security.permission.resource.LayoutPageTemplateEntryPermission;
+import com.liferay.layout.page.template.model.LayoutPageTemplateEntry;
+import com.liferay.layout.page.template.service.LayoutPageTemplateEntryLocalService;
 import com.liferay.layout.security.permission.resource.LayoutContentModelResourcePermission;
 import com.liferay.portal.kernel.language.LanguageUtil;
 import com.liferay.portal.kernel.log.Log;
@@ -69,7 +72,17 @@ public class ContentsContentPageEditorSidebarPanel
 		boolean pageIsDisplayPage) {
 
 		try {
-			if (_layoutPermission.contains(
+			if (pageIsDisplayPage) {
+				LayoutPageTemplateEntry layoutPageTemplateEntry =
+					_layoutPageTemplateEntryLocalService.
+						fetchLayoutPageTemplateEntryByPlid(plid);
+
+				return LayoutPageTemplateEntryPermission.contains(
+					permissionChecker,
+					layoutPageTemplateEntry.getLayoutPageTemplateEntryId(),
+					ActionKeys.UPDATE);
+			}
+			else if (_layoutPermission.contains(
 					permissionChecker, plid, ActionKeys.UPDATE) ||
 				_layoutPermission.contains(
 					permissionChecker, plid,
@@ -97,5 +110,9 @@ public class ContentsContentPageEditorSidebarPanel
 
 	@Reference
 	private LayoutContentModelResourcePermission _modelResourcePermission;
+
+	@Reference
+	private LayoutPageTemplateEntryLocalService
+		_layoutPageTemplateEntryLocalService;
 
 }
