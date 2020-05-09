@@ -1192,9 +1192,24 @@ public class ServicePreAction extends Action {
 				layoutTypeAccessPolicy.isCustomizeLayoutAllowed(
 					permissionChecker, layout);
 
-			hasUpdateLayoutPermission =
-				layoutTypeAccessPolicy.isUpdateLayoutAllowed(
-					permissionChecker, layout);
+			if (layout.isTypeContent()) {
+				long publishedLayoutPlid = layout.getClassPK();
+
+				if (publishedLayoutPlid == 0) {
+					publishedLayoutPlid = layout.getPlid();
+				}
+
+				Layout publishedLayout = 
+					LayoutLocalServiceUtil.fetchLayout(publishedLayoutPlid);
+	
+				hasUpdateLayoutPermission = LayoutPermissionUtil.contains(
+					permissionChecker, publishedLayout, ActionKeys.UPDATE);
+			}
+			else {
+				hasUpdateLayoutPermission =
+					layoutTypeAccessPolicy.isUpdateLayoutAllowed(
+						permissionChecker, layout);
+			}
 
 			layoutSet = layout.getLayoutSet();
 
@@ -2078,4 +2093,5 @@ public class ServicePreAction extends Action {
 		}
 	}
 
+	
 }
