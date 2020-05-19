@@ -69,7 +69,9 @@ public class FacetedSearcherImpl
 			BooleanFilter fullQueryBooleanFilter, SearchContext searchContext)
 		throws Exception {
 
-		BooleanQuery searchQuery = new BooleanQueryImpl();
+		BooleanQuery searchQuery = null;
+
+		searchQuery = new BooleanQueryImpl();
 
 		boolean luceneSyntax = GetterUtil.getBoolean(
 			searchContext.getAttribute(
