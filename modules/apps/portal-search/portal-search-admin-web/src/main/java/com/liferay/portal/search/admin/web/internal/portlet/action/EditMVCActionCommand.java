@@ -26,6 +26,9 @@ import com.liferay.portal.kernel.model.CompanyConstants;
 import com.liferay.portal.kernel.portlet.bridges.mvc.BaseMVCActionCommand;
 import com.liferay.portal.kernel.portlet.bridges.mvc.MVCActionCommand;
 import com.liferay.portal.kernel.search.IndexWriterHelper;
+import com.liferay.portal.kernel.search.Indexer;
+import com.liferay.portal.kernel.search.IndexerRegistryUtil;
+import com.liferay.portal.kernel.search.SearchEngineHelper;
 import com.liferay.portal.kernel.security.auth.PrincipalException;
 import com.liferay.portal.kernel.security.permission.PermissionChecker;
 import com.liferay.portal.kernel.servlet.SessionErrors;
@@ -34,6 +37,7 @@ import com.liferay.portal.kernel.util.ArrayUtil;
 import com.liferay.portal.kernel.util.Constants;
 import com.liferay.portal.kernel.util.ParamUtil;
 import com.liferay.portal.kernel.util.Time;
+import com.liferay.portal.kernel.util.Validator;
 import com.liferay.portal.kernel.util.WebKeys;
 import com.liferay.portal.kernel.uuid.PortalUUID;
 import com.liferay.portal.search.admin.web.internal.constants.SearchAdminPortletKeys;
@@ -104,14 +108,28 @@ public class EditMVCActionCommand extends BaseMVCActionCommand {
 		ThemeDisplay themeDisplay = (ThemeDisplay)actionRequest.getAttribute(
 			WebKeys.THEME_DISPLAY);
 
-		long[] companyIds = _portalInstancesLocalService.getCompanyIds();
+		String className = ParamUtil.getString(actionRequest, "className");
 
-		if (!ArrayUtil.contains(companyIds, CompanyConstants.SYSTEM)) {
+		long[] companyIds;
+
+		if (Validator.isNull(className)) {
 			companyIds = ArrayUtil.append(
-				new long[] {CompanyConstants.SYSTEM}, companyIds);
+				new long[] {CompanyConstants.SYSTEM},
+					_portalInstancesLocalService.getCompanyIds());
+		}
+		else {
+			Indexer indexer = IndexerRegistryUtil.getIndexer(className);
+
+			if (indexer.getSearchEngineId() ==
+				SearchEngineHelper.SYSTEM_ENGINE_ID) {
+
+				companyIds = new long[] {CompanyConstants.SYSTEM};
+			}
+			else {
+				companyIds = _portalInstancesLocalService.getCompanyIds();
+			}
 		}
 
-		String className = ParamUtil.getString(actionRequest, "className");
 		Map<String, Serializable> taskContextMap = new HashMap<>();
 
 		if (!ParamUtil.getBoolean(actionRequest, "blocking")) {
