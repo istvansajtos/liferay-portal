@@ -14,11 +14,14 @@
 
 package com.liferay.portal.search.internal.background.task;
 
+import com.liferay.osgi.service.tracker.collections.list.ServiceTrackerList;
+import com.liferay.osgi.service.tracker.collections.list.ServiceTrackerListFactory;
 import com.liferay.portal.kernel.backgroundtask.BackgroundTask;
 import com.liferay.portal.kernel.backgroundtask.BackgroundTaskExecutor;
 import com.liferay.portal.kernel.backgroundtask.constants.BackgroundTaskConstants;
 import com.liferay.portal.kernel.log.Log;
 import com.liferay.portal.kernel.log.LogFactoryUtil;
+import com.liferay.portal.kernel.model.CompanyConstants;
 import com.liferay.portal.kernel.search.IndexWriterHelper;
 import com.liferay.portal.kernel.search.Indexer;
 import com.liferay.portal.kernel.search.IndexerRegistry;
@@ -34,6 +37,7 @@ import java.io.Serializable;
 import java.util.Collection;
 import java.util.Map;
 
+import org.osgi.framework.BundleContext;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
 
@@ -53,6 +57,14 @@ public class ReindexSingleIndexerBackgroundTaskExecutor
 
 	public ReindexSingleIndexerBackgroundTaskExecutor() {
 		setIsolationLevel(BackgroundTaskConstants.ISOLATION_LEVEL_TASK_NAME);
+	}
+
+	public ReindexSingleIndexerBackgroundTaskExecutor(
+		BundleContext bundleContext) {
+
+		this();
+
+		_bundleContext = bundleContext;
 	}
 
 	@Override
@@ -88,6 +100,29 @@ public class ReindexSingleIndexerBackgroundTaskExecutor
 			searchEngineHelper.getSearchEngines();
 
 		for (long companyId : companyIds) {
+			if (companyId == CompanyConstants.SYSTEM) {
+
+				ServiceTrackerList<Indexer<?>, Indexer<?>> systemIndexers =
+					ServiceTrackerListFactory.open(
+						_bundleContext,
+						(Class<Indexer<?>>)(Class<?>)Indexer.class,
+						"(system.index=true)");
+
+				boolean isSystemIndexer = false;
+
+				for (Indexer systemIndexer : systemIndexers) {
+					if (indexer.equals(systemIndexer)) {
+						isSystemIndexer = true;
+
+						break;
+					}
+				}
+
+				if (!isSystemIndexer) {
+					continue;
+				}
+			}
+
 			reindexStatusMessageSender.sendStatusMessage(
 				ReindexBackgroundTaskConstants.SINGLE_START, companyId,
 				companyIds);
@@ -127,6 +162,8 @@ public class ReindexSingleIndexerBackgroundTaskExecutor
 
 	@Reference
 	protected SearchEngineHelper searchEngineHelper;
+
+	private BundleContext _bundleContext;
 
 	private static final Log _log = LogFactoryUtil.getLog(
 		ReindexSingleIndexerBackgroundTaskExecutor.class);
