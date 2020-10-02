@@ -1079,6 +1079,8 @@ public class ServicePreAction extends Action {
 				viewableStaging = true;
 			}
 
+			String type = layout.getType();
+
 			if (viewableStaging) {
 				layouts = LayoutLocalServiceUtil.getLayouts(
 					layout.getGroupId(), layout.isPrivateLayout(),
@@ -1087,7 +1089,9 @@ public class ServicePreAction extends Action {
 			else if ((!viewableGroup || !viewableSourceGroup) && stagingGroup) {
 				layout = null;
 			}
-			else if (!loginRequest &&
+			else if ((!type.equals(LayoutConstants.TYPE_CONTENT) &&
+					!type.equals(LayoutConstants.TYPE_ASSET_DISPLAY)) &&
+					!loginRequest &&
 					 (!viewableGroup || !viewableSourceGroup ||
 					  (!redirectToDefaultLayout &&
 					   !_hasAccessPermission(
