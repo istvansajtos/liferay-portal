@@ -724,8 +724,11 @@ public class ContentPageEditorDisplayContext {
 
 	protected boolean hasUpdateContentPermissions() {
 		try {
+			Layout publishedLayout = _getPublishedLayout();
+
 			if (LayoutPermissionUtil.contains(
-					themeDisplay.getPermissionChecker(), themeDisplay.getPlid(),
+					themeDisplay.getPermissionChecker(),
+					publishedLayout.getPlid(),
 					ActionKeys.UPDATE_LAYOUT_CONTENT)) {
 
 				return true;
@@ -742,9 +745,11 @@ public class ContentPageEditorDisplayContext {
 
 	protected boolean hasUpdatePermissions() {
 		try {
+			Layout publishedLayout = _getPublishedLayout();
+
 			if (LayoutPermissionUtil.contains(
-					themeDisplay.getPermissionChecker(), themeDisplay.getPlid(),
-					ActionKeys.UPDATE)) {
+					themeDisplay.getPermissionChecker(),
+					publishedLayout.getPlid(), ActionKeys.UPDATE)) {
 
 				return true;
 			}
