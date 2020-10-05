@@ -29,6 +29,7 @@ import com.liferay.item.selector.ItemSelector;
 import com.liferay.layout.content.page.editor.sidebar.panel.ContentPageEditorSidebarPanel;
 import com.liferay.layout.content.page.editor.web.internal.configuration.FFLayoutContentPageEditorConfiguration;
 import com.liferay.layout.content.page.editor.web.internal.configuration.PageEditorConfiguration;
+import com.liferay.layout.content.page.editor.web.internal.security.permission.resource.LayoutPageTemplateEntryPermission;
 import com.liferay.layout.page.template.model.LayoutPageTemplateEntry;
 import com.liferay.layout.page.template.service.LayoutPageTemplateEntryLocalServiceUtil;
 import com.liferay.petra.string.StringPool;
@@ -122,8 +123,7 @@ public class ContentPageEditorLayoutPageTemplateDisplayContext
 			LayoutPageTemplateEntry layoutPageTemplateEntry =
 				_getLayoutPageTemplateEntry();
 
-			if (_pageIsDisplayPage &&
-				LayoutPageTemplateEntryPermission.contains(
+			if (LayoutPageTemplateEntryPermission.contains(
 					themeDisplay.getPermissionChecker(),
 					layoutPageTemplateEntry.getLayoutPageTemplateEntryId(),
 					ActionKeys.UPDATE)) {
@@ -147,8 +147,7 @@ public class ContentPageEditorLayoutPageTemplateDisplayContext
 			LayoutPageTemplateEntry layoutPageTemplateEntry =
 				_getLayoutPageTemplateEntry();
 
-			if (_pageIsDisplayPage &&
-				LayoutPageTemplateEntryPermission.contains(
+			if (LayoutPageTemplateEntryPermission.contains(
 					themeDisplay.getPermissionChecker(),
 					layoutPageTemplateEntry.getLayoutPageTemplateEntryId(),
 					ActionKeys.UPDATE)) {
