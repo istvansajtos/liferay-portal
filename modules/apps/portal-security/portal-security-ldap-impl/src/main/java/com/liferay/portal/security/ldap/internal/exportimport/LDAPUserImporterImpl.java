@@ -61,6 +61,7 @@ import com.liferay.portal.kernel.util.PropsKeys;
 import com.liferay.portal.kernel.util.PwdGenerator;
 import com.liferay.portal.kernel.util.StringUtil;
 import com.liferay.portal.kernel.util.Validator;
+import com.liferay.portal.kernel.workflow.WorkflowConstants;
 import com.liferay.portal.security.exportimport.UserImporter;
 import com.liferay.portal.security.ldap.ContactConverterKeys;
 import com.liferay.portal.security.ldap.SafeLdapContext;
@@ -1141,7 +1142,10 @@ public class LDAPUserImporterImpl implements LDAPUserImporter, UserImporter {
 
 			User user = getUser(ldapImportContext.getCompanyId(), ldapUser);
 
-			if ((user != null) && user.isDefaultUser()) {
+			if ((user != null) &&
+				(user.isDefaultUser() ||
+				 (user.getStatus() == WorkflowConstants.STATUS_INACTIVE))) {
+
 				return user;
 			}
 
