@@ -23,6 +23,7 @@ import com.liferay.portal.kernel.log.LogFactoryUtil;
 import com.liferay.portal.kernel.security.auth.CompanyThreadLocal;
 import com.liferay.portal.kernel.service.ServiceContext;
 import com.liferay.portal.kernel.service.ServiceContextFactory;
+import com.liferay.portal.kernel.util.JavaConstants;
 import com.liferay.portal.kernel.util.Portal;
 import com.liferay.portal.kernel.util.Time;
 import com.liferay.portal.kernel.util.Validator;
@@ -86,6 +87,8 @@ import java.net.URISyntaxException;
 
 import java.util.Date;
 
+import javax.portlet.PortletRequest;
+import javax.portlet.PortletSession;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
@@ -211,7 +214,7 @@ public class OpenIdConnectServiceHandlerImpl
 
 		if (openIdConnectSessionImpl == null) {
 			openIdConnectSessionImpl = createAndSetOpenIdConnectSession(
-				httpSession, openIdConnectProviderName);
+				httpServletRequest, openIdConnectProviderName);
 		}
 
 		URI authenticationRequestURI = getAuthenticationRequestURI(
@@ -238,15 +241,21 @@ public class OpenIdConnectServiceHandlerImpl
 	}
 
 	protected OpenIdConnectSessionImpl createAndSetOpenIdConnectSession(
-		HttpSession httpSession, String openIdConnectProviderName) {
+		HttpServletRequest httpServletRequest, String openIdConnectProviderName) {
+
+		PortletRequest portletRequest =
+			(PortletRequest)httpServletRequest.getAttribute(
+				JavaConstants.JAVAX_PORTLET_REQUEST);
+
+		PortletSession portletSession = portletRequest.getPortletSession();
 
 		OpenIdConnectSessionImpl openIdConnectSessionImpl =
 			new OpenIdConnectSessionImpl(
 				openIdConnectProviderName, new Nonce(), new State());
 
-		httpSession.setAttribute(
+		portletSession.setAttribute(
 			OpenIdConnectWebKeys.OPEN_ID_CONNECT_SESSION,
-			openIdConnectSessionImpl);
+			openIdConnectSessionImpl, PortletSession.APPLICATION_SCOPE);
 
 		return openIdConnectSessionImpl;
 	}
