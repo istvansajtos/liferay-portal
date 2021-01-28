@@ -22,9 +22,9 @@ import com.nimbusds.oauth2.sdk.token.AccessToken;
 import com.nimbusds.oauth2.sdk.token.RefreshToken;
 import com.nimbusds.openid.connect.sdk.Nonce;
 
-import net.minidev.json.JSONObject;
-
 import java.io.Serializable;
+
+import net.minidev.json.JSONObject;
 
 /**
  * @author Edward C. Han
