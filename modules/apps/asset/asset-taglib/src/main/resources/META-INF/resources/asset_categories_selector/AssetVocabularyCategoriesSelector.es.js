@@ -273,6 +273,7 @@ function AssetVocabulariesCategoriesSelector({
 					</ClayInput.GroupItem>
 				</ClayInput.Group>
 			</ClayForm.Group>
+		<div name="my-custom-div" />
 		</div>
 	);
 }
