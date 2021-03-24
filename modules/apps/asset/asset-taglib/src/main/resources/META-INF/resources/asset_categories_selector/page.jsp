@@ -27,7 +27,7 @@ List<Map<String, Object>> vocabularies = (List<Map<String, Object>>)data.get("vo
 
 		<%
 		for (Map<String, Object> vocabulary : vocabularies) {
-			String vocabularyId = GetterUtil.getString(vocabulary.get("id"));
+			Long vocabularyId = GetterUtil.getLong(vocabulary.get("id"));
 		%>
 
 			<div class="field-content">
@@ -96,6 +96,32 @@ List<Map<String, Object>> vocabularies = (List<Map<String, Object>>)data.get("vo
 		}
 		%>
 
+			<div class="field-content">
+				<div class="form-group" id="<%= "namespace_assetCategoriesSelector_" + "41009" %>">
+						<label>
+							<%= "TestVocabulary1" %>
+						</label>
+
+					<div class="input-group">
+						<div class="input-group-item">
+							<div class="form-control form-control-tag-group input-group">
+								<div class="input-group-item">
+
+											<input name="<%= "_com_liferay_journal_web_portlet_JournalPortlet_assetCategoryIds_41009" %>" type="hidden" value="<%= 41010 %>" />
+
+									<input class="form-control-inset" type="text" value="" />
+								</div>
+							</div>
+						</div>
+
+						<div class="input-group-item input-group-item-shrink">
+							<button class="btn btn-secondary" type="button">
+								<liferay-ui:message key="select" />
+							</button>
+						</div>
+					</div>
+				</div>
+			</div>
 	</div>
 
 	<react:component
