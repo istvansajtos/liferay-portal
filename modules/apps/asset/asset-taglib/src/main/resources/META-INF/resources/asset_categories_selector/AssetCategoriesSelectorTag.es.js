@@ -62,6 +62,7 @@ export default function (props) {
 			vocabulary.visibilityType ===
 			ASSET_VOCABULARY_VISIBILITY_TYPES.internal
 	);
+	const inputName = props.inputName;
 
 	return (
 		<>
