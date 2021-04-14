@@ -38,6 +38,7 @@ function AssetVocabulariesCategoriesSelector({
 	selectedItems = [],
 	singleSelect,
 	sourceItemsVocabularyIds = [],
+	restrictedItems = [],
 	useFallbackInput,
 }) {
 	const [inputValue, setInputValue] = useState('');
@@ -215,6 +216,25 @@ function AssetVocabulariesCategoriesSelector({
 							inputName={inputName}
 							inputValue={inputValue}
 							items={selectedItems}
+							onChange={setInputValue}
+							onItemsChange={handleItemsChange}
+							sourceItems={
+								resource
+									? resource.map((category) => {
+											return {
+												label:
+													category.titleCurrentValue,
+												value: category.categoryId,
+											};
+									  })
+									: []
+							}
+						/>
+
+						<ClayMultiSelect
+							inputName={inputName}
+							inputValue={inputValue}
+							items={restrictedItems}
 							onChange={setInputValue}
 							onItemsChange={handleItemsChange}
 							sourceItems={

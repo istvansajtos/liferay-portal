@@ -60,6 +60,7 @@ function AssetCategoriesSelector({
 						selectedItems={vocabulary.selectedItems}
 						singleSelect={vocabulary.singleSelect}
 						sourceItemsVocabularyIds={[vocabulary.id]}
+						restrictedItems={vocabulary.restrictedItems}
 						useFallbackInput={useFallbackInput}
 					/>
 				);

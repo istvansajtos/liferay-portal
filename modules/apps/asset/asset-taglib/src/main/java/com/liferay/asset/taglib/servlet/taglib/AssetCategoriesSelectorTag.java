@@ -19,7 +19,9 @@ import com.liferay.asset.kernel.model.AssetCategory;
 import com.liferay.asset.kernel.model.AssetCategoryConstants;
 import com.liferay.asset.kernel.model.AssetVocabulary;
 import com.liferay.asset.kernel.model.AssetVocabularyConstants;
+import com.liferay.asset.kernel.service.AssetCategoryLocalServiceUtil;
 import com.liferay.asset.kernel.service.AssetCategoryServiceUtil;
+import com.liferay.asset.kernel.service.AssetVocabularyLocalServiceUtil;
 import com.liferay.asset.kernel.service.AssetVocabularyServiceUtil;
 import com.liferay.asset.taglib.internal.servlet.ServletContextUtil;
 import com.liferay.asset.taglib.internal.util.AssetCategoryUtil;
@@ -47,6 +49,8 @@ import com.liferay.taglib.util.IncludeTag;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import javax.portlet.PortletRequest;
 import javax.portlet.PortletResponse;
@@ -315,6 +319,65 @@ public class AssetCategoriesSelectorTag extends IncludeTag {
 		return null;
 	}
 
+	protected List<String[]> getRestrictedIdsTitles() {
+		ThemeDisplay themeDisplay = (ThemeDisplay)request.getAttribute(
+			WebKeys.THEME_DISPLAY);
+
+		List<String[]> restrictedIdsTitles = new ArrayList<>();
+
+		if (Validator.isNotNull(_categoryIds)) {
+			return restrictedIdsTitles;
+		}
+
+		if (Validator.isNull(_className)) {
+			return restrictedIdsTitles;
+		}
+
+		try {
+			for (AssetVocabulary vocabulary : _getVocabularies()) {
+				String restrictedIds = StringPool.BLANK;
+				String restrictedNames = StringPool.BLANK;
+
+				if (Validator.isNotNull(_className) && (_classPK > 0)) {
+					List<AssetCategory> categories =
+						AssetCategoryLocalServiceUtil.getCategories(
+							_className, _classPK);
+					List<AssetCategory> filteredCategories =
+						AssetCategoryServiceUtil.getCategories(
+							_className, _classPK);
+
+					Stream<AssetCategory> categoriesStream = categories.stream();
+
+					List<AssetCategory> restrictedCategories =
+						categoriesStream.filter(
+							n -> !filteredCategories.contains(n)
+					).collect(
+						Collectors.toList()
+					);
+
+					restrictedIds = ListUtil.toString(
+						restrictedCategories, AssetCategory.CATEGORY_ID_ACCESSOR);
+					restrictedNames = ListUtil.toString(
+						restrictedCategories, AssetCategory.NAME_ACCESSOR);
+				}
+
+				String[] restrictedIdsTitle =
+					AssetCategoryUtil.getCategoryIdsTitles(
+						restrictedIds, restrictedNames,
+						vocabulary.getVocabularyId(), themeDisplay);
+
+				restrictedIdsTitles.add(restrictedIdsTitle);
+			}
+		}
+		catch (Exception exception) {
+			if (_log.isDebugEnabled()) {
+				_log.debug(exception, exception);
+			}
+		}
+
+		return restrictedIdsTitles;
+	}
+
 	protected List<Map<String, Object>> getVocabularies() throws Exception {
 		ThemeDisplay themeDisplay = (ThemeDisplay)request.getAttribute(
 			WebKeys.THEME_DISPLAY);
@@ -324,6 +387,8 @@ public class AssetCategoriesSelectorTag extends IncludeTag {
 		List<AssetVocabulary> vocabularies = _getVocabularies();
 
 		List<String[]> categoryIdsTitles = getCategoryIdsTitles();
+
+		List<String[]> restrictedIdsTitles = getRestrictedIdsTitles();
 
 		for (int i = 0; i < vocabularies.size(); i++) {
 			AssetVocabulary vocabulary = vocabularies.get(i);
@@ -382,6 +447,31 @@ public class AssetCategoriesSelectorTag extends IncludeTag {
 				}
 
 				vocabularyMap.put("selectedItems", selectedItems);
+			}
+
+			String restrictedIds = restrictedIdsTitles.get(index)[0];
+
+			if (Validator.isNotNull(restrictedIds)) {
+				List<Map<String, Object>> restrictedItems = new ArrayList<>();
+
+				String[] categoryIds = restrictedIds.split(",");
+
+				String selectedCategoryIdTitles =
+					restrictedIdsTitles.get(index)[1];
+
+				String[] categoryTitles = selectedCategoryIdTitles.split(
+					AssetCategoryUtil.CATEGORY_SEPARATOR);
+
+				for (int j = 0; j < categoryIds.length; j++) {
+					restrictedItems.add(
+						HashMapBuilder.<String, Object>put(
+							"label", categoryTitles[j]
+						).put(
+							"value", categoryIds[j]
+						).build());
+				}
+
+				vocabularyMap.put("restrictedItems", restrictedItems);
 			}
 
 			vocabularyMap.put("singleSelect", !vocabulary.isMultiValued());
@@ -474,7 +564,7 @@ public class AssetCategoriesSelectorTag extends IncludeTag {
 		List<AssetVocabulary> vocabularies = new ArrayList<>();
 
 		vocabularies.addAll(
-			AssetVocabularyServiceUtil.getGroupVocabularies(getGroupIds()));
+			AssetVocabularyLocalServiceUtil.getGroupVocabularies(getGroupIds()));
 
 		ThemeDisplay themeDisplay = (ThemeDisplay)request.getAttribute(
 			WebKeys.THEME_DISPLAY);
