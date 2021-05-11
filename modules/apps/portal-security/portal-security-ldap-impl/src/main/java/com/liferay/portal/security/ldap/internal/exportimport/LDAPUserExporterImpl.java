@@ -93,7 +93,8 @@ public class LDAPUserExporterImpl implements UserExporter {
 			contact.getContactId());
 
 		if (user.isDefaultUser() ||
-			(user.getStatus() != WorkflowConstants.STATUS_APPROVED)) {
+			((user.getStatus() != WorkflowConstants.STATUS_APPROVED) &&
+			(user.getStatus() != WorkflowConstants.STATUS_INACTIVE))) {
 
 			return;
 		}
@@ -451,6 +452,25 @@ public class LDAPUserExporterImpl implements UserExporter {
 	@Reference(unbind = "-")
 	protected void setUserLocalService(UserLocalService userLocalService) {
 		_userLocalService = userLocalService;
+	}
+
+	private boolean isAnonymousUser(User user) {
+		try {
+			User anonymousUser = getAnonymousUser(user.getCompanyId());
+
+			if (user.getUserId() == anonymousUser.getUserId()) {
+				return true;
+			}
+
+			return false;
+		}
+		catch (Exception exception) {
+			if (_log.isDebugEnabled()) {
+				_log.debug(exception, exception);
+			}
+
+			return false;
+		}
 	}
 
 	private static final Log _log = LogFactoryUtil.getLog(
