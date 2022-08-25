@@ -5061,6 +5061,8 @@ public class UserLocalServiceImpl extends UserLocalServiceBaseImpl {
 			validateCompanyMaxUsers(user.getCompanyId());
 		}
 
+		user = userPersistence.findByPrimaryKey(userId);
+
 		String passwordUnencrypted = (String)serviceContext.getAttribute(
 			"passwordUnencrypted");
 
