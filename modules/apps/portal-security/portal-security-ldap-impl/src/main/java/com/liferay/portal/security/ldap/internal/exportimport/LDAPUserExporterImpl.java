@@ -37,14 +37,13 @@ import com.liferay.portal.security.ldap.exportimport.Modifications;
 import com.liferay.portal.security.ldap.exportimport.PortalToLDAPConverter;
 import com.liferay.portal.security.ldap.internal.PortalLDAPContext;
 import com.liferay.portal.security.ldap.util.LDAPUtil;
+import com.liferay.user.associated.data.anonymizer.UADAnonymousUserProvider;
 
 import java.io.Serializable;
 
 import java.util.Date;
-import java.util.Dictionary;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.Properties;
 
 import javax.naming.Binding;
@@ -57,7 +56,6 @@ import javax.naming.ldap.LdapContext;
 
 import org.apache.commons.lang.time.StopWatch;
 
-import org.osgi.service.cm.Configuration;
 import org.osgi.service.cm.ConfigurationAdmin;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
@@ -99,7 +97,7 @@ public class LDAPUserExporterImpl implements UserExporter {
 		if (user.isDefaultUser() ||
 			((user.getStatus() != WorkflowConstants.STATUS_APPROVED) &&
 			 (user.getStatus() != WorkflowConstants.STATUS_INACTIVE)) ||
-			_isAnonymousUser(user)) {
+			_uadAnonymousUserProvider.isAnonymousUser(user)) {
 
 			return;
 		}
@@ -278,7 +276,7 @@ public class LDAPUserExporterImpl implements UserExporter {
 		if (user.isDefaultUser() ||
 			((user.getStatus() != WorkflowConstants.STATUS_APPROVED) &&
 			 (user.getStatus() != WorkflowConstants.STATUS_INACTIVE)) ||
-			_isAnonymousUser(user)) {
+			_uadAnonymousUserProvider.isAnonymousUser(user)) {
 
 			return;
 		}
@@ -433,54 +431,6 @@ public class LDAPUserExporterImpl implements UserExporter {
 			ldapServerId, userGroup.getCompanyId(), userGroup.getName());
 	}
 
-	private User _getAnonymousUser(long companyId) throws Exception {
-		Configuration[] configurations = _configurationAdmin.listConfigurations(
-			String.format(
-				"(&(companyId=%s)(service.factoryPid=%s))", companyId,
-				"com.liferay.user.associated.data.web.internal.configuration." +
-					"AnonymousUserConfiguration.scoped"));
-
-		if (configurations == null) {
-			return null;
-		}
-
-		Optional<Configuration> configurationOptional = Optional.of(
-			configurations[0]);
-
-		if (!configurationOptional.isPresent()) {
-			return null;
-		}
-
-		Configuration configuration = configurationOptional.get();
-
-		Dictionary<String, Object> properties = configuration.getProperties();
-
-		long anonymousUserId = (long)properties.get("userId");
-
-		return _userLocalService.fetchUser(anonymousUserId);
-	}
-
-	private boolean _isAnonymousUser(User user) {
-		try {
-			User anonymousUser = _getAnonymousUser(user.getCompanyId());
-
-			if ((anonymousUser != null) &&
-				(user.getUserId() == anonymousUser.getUserId())) {
-
-				return true;
-			}
-
-			return false;
-		}
-		catch (Exception exception) {
-			if (_log.isDebugEnabled()) {
-				_log.debug(exception);
-			}
-
-			return false;
-		}
-	}
-
 	private static final Log _log = LogFactoryUtil.getLog(
 		LDAPUserExporterImpl.class);
 
@@ -507,6 +457,9 @@ public class LDAPUserExporterImpl implements UserExporter {
 		policyOption = ReferencePolicyOption.GREEDY
 	)
 	private volatile SafePortalLDAP _safePortalLDAP;
+
+	@Reference
+	private UADAnonymousUserProvider _uadAnonymousUserProvider;
 
 	@Reference
 	private UserGroupLocalService _userGroupLocalService;
