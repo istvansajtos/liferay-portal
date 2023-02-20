@@ -28,6 +28,7 @@ import com.liferay.portal.kernel.model.Company;
 import com.liferay.portal.kernel.model.Group;
 import com.liferay.portal.kernel.model.Organization;
 import com.liferay.portal.kernel.model.PasswordPolicy;
+import com.liferay.portal.kernel.model.ResourceConstants;
 import com.liferay.portal.kernel.model.Role;
 import com.liferay.portal.kernel.model.Ticket;
 import com.liferay.portal.kernel.model.User;
@@ -35,11 +36,13 @@ import com.liferay.portal.kernel.model.UserGroup;
 import com.liferay.portal.kernel.model.role.RoleConstants;
 import com.liferay.portal.kernel.security.auth.AuthException;
 import com.liferay.portal.kernel.security.auth.Authenticator;
+import com.liferay.portal.kernel.security.permission.ActionKeys;
 import com.liferay.portal.kernel.security.permission.PermissionChecker;
 import com.liferay.portal.kernel.security.permission.PermissionCheckerFactoryUtil;
 import com.liferay.portal.kernel.security.permission.PermissionThreadLocal;
 import com.liferay.portal.kernel.security.pwd.PasswordEncryptor;
 import com.liferay.portal.kernel.security.pwd.PasswordEncryptorUtil;
+import com.liferay.portal.kernel.service.CompanyLocalService;
 import com.liferay.portal.kernel.service.GroupLocalService;
 import com.liferay.portal.kernel.service.PasswordPolicyLocalService;
 import com.liferay.portal.kernel.service.PortalPreferencesLocalService;
@@ -68,6 +71,7 @@ import com.liferay.portal.kernel.transaction.TransactionInvokerUtil;
 import com.liferay.portal.kernel.util.ArrayUtil;
 import com.liferay.portal.kernel.util.LinkedHashMapBuilder;
 import com.liferay.portal.kernel.util.ListUtil;
+import com.liferay.portal.kernel.util.LocaleThreadLocal;
 import com.liferay.portal.kernel.util.OrderByComparator;
 import com.liferay.portal.kernel.util.PortletKeys;
 import com.liferay.portal.kernel.workflow.WorkflowConstants;
@@ -80,6 +84,7 @@ import java.lang.reflect.Field;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.stream.LongStream;
 
@@ -100,6 +105,54 @@ public class UserLocalServiceTest {
 	@Rule
 	public static final AggregateTestRule aggregateTestRule =
 		new LiferayIntegrationTestRule();
+
+	@Test
+	public void testAddUserToCompanyWithMaxUsersLimit() throws Exception {
+		String companyName = RandomTestUtil.randomString();
+
+		String virtualHostname =
+			companyName + "." + RandomTestUtil.randomString(3);
+
+		Company company = _companyLocalService.addCompany(
+			null, companyName, virtualHostname, virtualHostname, 100, true);
+
+		User user = UserTestUtil.addUser(company);
+
+		Role role = _roleLocalService.addRole(
+			user.getUserId(), null, 0, RandomTestUtil.randomString(), null,
+			null, RoleConstants.TYPE_REGULAR, null, null);
+
+		RoleTestUtil.addResourcePermission(
+			role, PortletKeys.PORTAL, ResourceConstants.SCOPE_COMPANY,
+			String.valueOf(company.getCompanyId()), ActionKeys.ADD_USER);
+
+		_roleLocalService.addUserRole(user.getUserId(), role);
+
+		UserTestUtil.setUser(user);
+
+		long creatorUserId = user.getUserId();
+		boolean autoPassword = true;
+		boolean autoScreenName = true;
+		String emailAddress = RandomTestUtil.randomString() + "@liferay.com";
+		Locale locale = LocaleThreadLocal.getDefaultLocale();
+		String firstName = RandomTestUtil.randomString();
+		String middleName = StringPool.BLANK;
+		String lastName = RandomTestUtil.randomString();
+		long prefixListTypeId = 0;
+		long suffixListTypeId = 0;
+		boolean male = true;
+		int birthdayMonth = Calendar.JANUARY;
+		int birthdayDay = 1;
+		int birthdayYear = 1970;
+		String jobTitle = StringPool.BLANK;
+
+		_userLocalService.addUserWithWorkflow(
+			creatorUserId, company.getCompanyId(), autoPassword, null, null,
+			autoScreenName, null, emailAddress, locale, firstName, middleName,
+			lastName, prefixListTypeId, suffixListTypeId, male, birthdayMonth,
+			birthdayDay, birthdayYear, jobTitle, null, null, null, null, false,
+			ServiceContextTestUtil.getServiceContext());
+	}
 
 	@Test
 	public void testAuthenticateByEmailAddress() throws Exception {
@@ -761,6 +814,9 @@ public class UserLocalServiceTest {
 	@Inject
 	private AnnouncementsDeliveryLocalService
 		_announcementsDeliveryLocalService;
+
+	@Inject
+	private CompanyLocalService _companyLocalService;
 
 	@Inject
 	private GroupLocalService _groupLocalService;
