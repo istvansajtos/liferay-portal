@@ -5091,13 +5091,11 @@ public class UserLocalServiceImpl extends UserLocalServiceBaseImpl {
 			long userId, int status, ServiceContext serviceContext)
 		throws PortalException {
 
-		User user = userPersistence.findByPrimaryKey(userId);
-
-		if ((status == WorkflowConstants.STATUS_APPROVED) &&
-			(user.getStatus() != WorkflowConstants.STATUS_APPROVED)) {
-
-			validateCompanyMaxUsers(user.getCompanyId());
+		if (status == WorkflowConstants.STATUS_APPROVED) {
+			validateCompanyMaxUsers(serviceContext.getCompanyId());
 		}
+
+		User user = userPersistence.findByPrimaryKey(userId);
 
 		String passwordUnencrypted = (String)serviceContext.getAttribute(
 			"passwordUnencrypted");
