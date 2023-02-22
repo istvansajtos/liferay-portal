@@ -111,11 +111,13 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
 import java.util.stream.Stream;
+import java.util.stream.Collectors;
 
 import javax.portlet.PortletRequest;
 
@@ -588,7 +590,7 @@ public class ExportImportHelperImpl implements ExportImportHelper {
 
 		return getZipWriter(fileName);
 	}
-
+/*
 	@Override
 	public String getSelectedLayoutsJSON(
 		long groupId, boolean privateLayout, String selectedNodes) {
@@ -614,6 +616,104 @@ public class ExportImportHelperImpl implements ExportImportHelper {
 		}
 
 		return jsonArray.toString();
+	}
+*/
+	public String getSelectedLayoutsJSON(
+		long groupId, boolean privateLayout, String selectedNodes) {
+
+		List<Layout> layouts =
+			_layoutLocalService.getLayouts(groupId, privateLayout);
+
+		Node root = _buildTree(new Node(null), layouts);
+
+		JSONArray jsonArray = _jsonFactory.createJSONArray();
+
+		long[] selectedPlids = StringUtil.split(selectedNodes, 0L);
+
+		_populateLayoutsJSON2(jsonArray, root, selectedPlids);
+
+		if (ArrayUtil.contains(selectedPlids, 0)) {
+			jsonArray.put(
+				JSONUtil.put(
+					"includeChildren", true
+				).put(
+					"plid", 0
+				));
+		}
+
+		return jsonArray.toString();
+	}
+
+	private Node _buildTree(Node parentNode, List<Layout> layouts) {
+		Layout parentLayout = parentNode.getLayout();
+
+		long parentLayoutId =
+			parentLayout != null ? parentLayout.getLayoutId() : 0;
+
+		List<Layout> childLayouts = layouts.stream().filter(layout -> layout.getParentLayoutId() == parentLayoutId).collect(Collectors.toList());
+
+		layouts.removeAll(childLayouts);
+
+		List<Node> childNodes = childLayouts.stream().map(layout -> 
+			{return new Node(layout);}).collect(Collectors.toList());
+
+		parentNode.addChildNodes(childNodes);
+
+		for (Node childNode : childNodes) {
+			_buildTree(childNode, layouts);
+		}
+
+		return parentNode;
+	}
+
+	private boolean _populateLayoutsJSON2(
+		JSONArray layoutsJSONArray, Node node, long[] selectedLayoutIds) {
+
+		List<Node> childNodes = node.getChildNodes();
+		JSONArray childLayoutsJSONArray = null;
+		boolean includeChildren = true;
+
+		if (ListUtil.isNotEmpty(childNodes)) {
+			childLayoutsJSONArray = _jsonFactory.createJSONArray();
+
+			for (Node childNode : childNodes) {
+				if (!_populateLayoutsJSON2(
+						childLayoutsJSONArray, childNode,
+						selectedLayoutIds)) {
+
+					includeChildren = false;
+				}
+			}
+		}
+
+		Layout layout = node.getLayout();
+
+		boolean checked = ArrayUtil.contains(
+			selectedLayoutIds, layout.getLayoutId());
+
+		if (checked) {
+			layoutsJSONArray.put(
+				JSONUtil.put(
+					"includeChildren", includeChildren
+				).put(
+					"plid", layout.getPlid()
+				));
+		}
+
+		if (checked && includeChildren) {
+			return true;
+		}
+
+		if (childLayoutsJSONArray != null) {
+
+			// We want a 1 level array and not an array of arrays
+
+			for (int i = 0; i < childLayoutsJSONArray.length(); i++) {
+				layoutsJSONArray.put(childLayoutsJSONArray.getJSONObject(i));
+			}
+		}
+
+		return false;
 	}
 
 	@Override
@@ -1606,4 +1706,25 @@ public class ExportImportHelperImpl implements ExportImportHelper {
 
 	}
 
+	private class Node {
+		public Node(Layout layout) {
+			this.layout = layout;
+		}
+
+		public void addChildNodes(List<Node> childNodes) {
+			this.childNodes = childNodes;
+		}
+
+		public List<Node> getChildNodes() {
+			return getChildNodes();
+		}
+
+		public Layout getLayout() {
+			return layout;
+		}
+
+		private Layout layout;
+
+		private List<Node> childNodes = new LinkedList<>();
+	}
 }
