@@ -49,6 +49,7 @@ import com.liferay.portal.kernel.service.PasswordPolicyLocalService;
 import com.liferay.portal.kernel.service.PortalPreferencesLocalService;
 import com.liferay.portal.kernel.service.PortletPreferencesLocalService;
 import com.liferay.portal.kernel.service.RoleLocalService;
+import com.liferay.portal.kernel.service.ServiceContext;
 import com.liferay.portal.kernel.service.ServiceContextThreadLocal;
 import com.liferay.portal.kernel.service.TicketLocalService;
 import com.liferay.portal.kernel.service.UserGroupLocalService;
@@ -135,15 +136,11 @@ public class UserLocalServiceTest {
 
 		UserTestUtil.setUser(user);
 
-		Assert.assertNotNull(
-			_userLocalService.addUserWithWorkflow(
-				user.getUserId(), company.getCompanyId(), true, null, null,
-				true, null, RandomTestUtil.randomString() + "@liferay.com",
-				LocaleThreadLocal.getDefaultLocale(),
-				RandomTestUtil.randomString(), StringPool.BLANK,
-				RandomTestUtil.randomString(), 0, 0, true, Calendar.JANUARY, 1,
-				1970, StringPool.BLANK, UserConstants.TYPE_REGULAR, null, null,
-				null, null, false, ServiceContextTestUtil.getServiceContext()));
+		_testAddUser(
+			user.getUserId(), company.getCompanyId(),
+			ServiceContextTestUtil.getServiceContext());
+
+		_testAddUser(user.getUserId(), company.getCompanyId(), null);
 	}
 
 	@Test
@@ -811,6 +808,21 @@ public class UserLocalServiceTest {
 		}
 
 		return userIds;
+	}
+
+	private void _testAddUser(
+			long creatorUserId, long companyId, ServiceContext serviceContext)
+		throws Exception {
+
+		Assert.assertNotNull(
+			_userLocalService.addUserWithWorkflow(
+				creatorUserId, companyId, true, null, null, true, null,
+				RandomTestUtil.randomString() + "@liferay.com",
+				LocaleThreadLocal.getDefaultLocale(),
+				RandomTestUtil.randomString(), StringPool.BLANK,
+				RandomTestUtil.randomString(), 0, 0, true, Calendar.JANUARY, 1,
+				1970, StringPool.BLANK, UserConstants.TYPE_REGULAR, null, null,
+				null, null, false, serviceContext));
 	}
 
 	@Inject
