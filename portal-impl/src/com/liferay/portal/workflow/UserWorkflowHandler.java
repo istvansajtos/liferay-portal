@@ -69,6 +69,12 @@ public class UserWorkflowHandler extends BaseWorkflowHandler<User> {
 		ServiceContext serviceContext = (ServiceContext)workflowContext.get(
 			WorkflowConstants.CONTEXT_SERVICE_CONTEXT);
 
+		if (serviceContext.getCompanyId() == 0) {
+			serviceContext.setCompanyId(
+				GetterUtil.getLong(
+					workflowContext.get(WorkflowConstants.CONTEXT_COMPANY_ID)));
+		}
+
 		if (((user.getStatus() == WorkflowConstants.STATUS_DRAFT) ||
 			 (user.getStatus() == WorkflowConstants.STATUS_PENDING)) &&
 			(status == WorkflowConstants.STATUS_APPROVED)) {
