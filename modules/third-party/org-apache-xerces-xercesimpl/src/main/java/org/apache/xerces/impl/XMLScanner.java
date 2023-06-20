@@ -1504,7 +1504,9 @@ public abstract class XMLScanner
         // initialize vars
         fEntityDepth = 0;
         fReportEntity = true;
-        fResourceIdentifier.clear();
+        fResourceIdentifier.
+        clear();
     } 
 
 } // class XMLScanner
+/* @generated */

@@ -1,0 +1,15 @@
+diff --git a/org/apache/xerces/impl/XMLScanner.java b/org/apache/xerces/impl/XMLScanner.java
+index 2c4d79707b6f..9a6eea05ae08 100644
+--- a/org/apache/xerces/impl/XMLScanner.java
++++ b/org/apache/xerces/impl/XMLScanner.java
+@@ -1504,7 +1504,9 @@ public abstract class XMLScanner
+         // initialize vars
+         fEntityDepth = 0;
+         fReportEntity = true;
+-        fResourceIdentifier.clear();
++        fResourceIdentifier.
++        clear();
+     } 
+ 
+ } // class XMLScanner
++/* @generated */
