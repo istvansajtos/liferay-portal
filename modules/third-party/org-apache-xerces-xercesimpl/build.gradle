@@ -1,0 +1,19 @@
+import com.liferay.gradle.plugins.patcher.PatchTask
+
+apply plugin: "com.liferay.patcher"
+
+task patch(type: PatchTask)
+
+dependencies {
+	compile group: "xerces", name: "xercesImpl", version: "2.12.2"
+}
+
+patch {
+	ext {
+		autoClean = false
+	}
+
+	fileNames "org/apache/xerces/impl/XMLScanner.java"
+
+	originalLibModuleName = "xercesImpl"
+}
