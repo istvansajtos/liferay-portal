@@ -1,4 +1,5 @@
 dependencies {
+	compileInclude group: "com.liferay", name: "org.apache.xerces.xercesimpl", version: "2.12.2.LIFERAY-PATCHED-1"
 	compileInclude group: "com.googlecode.java-diff-utils", name: "diffutils", version: "1.3.0"
 	compileInclude group: "com.puppycrawl.tools", name: "checkstyle", version: "8.29"
 	compileInclude group: "com.thoughtworks.qdox", name: "qdox", version: "2.0-M5"
@@ -15,7 +16,6 @@ dependencies {
 	compileInclude group: "org.dom4j", name: "dom4j", version: "2.1.3"
 	compileInclude group: "org.json", name: "json", version: "20230227"
 	compileInclude group: "org.reflections", name: "reflections", "version": "0.10.2"
-	compileInclude group: "xerces", name: "xercesImpl", version: "2.12.2"
 
 	compileInclude group: "com.liferay", name: "com.liferay.petra.function", version: "5.5.0"
 	compileInclude group: "com.liferay", name: "com.liferay.petra.lang", version: "1.0.0"
