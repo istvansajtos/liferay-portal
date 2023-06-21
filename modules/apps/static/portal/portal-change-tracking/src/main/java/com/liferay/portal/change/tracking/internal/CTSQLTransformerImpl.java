@@ -197,10 +197,12 @@ public class CTSQLTransformerImpl implements CTSQLTransformer {
 	public void activate(BundleContext bundleContext) throws Exception {
 		_bundleContext = bundleContext;
 
-		_ctTransformedSQLs = new LRUMap<>(
-			PropsValues.CHANGE_TRACKING_SQL_TRANSFORMER_CACHE_SIZE);
-		_productionTransformedSQLs = new LRUMap<>(
-			PropsValues.CHANGE_TRACKING_SQL_TRANSFORMER_CACHE_SIZE);
+		_ctTransformedSQLs = Collections.synchronizedMap(
+			new LRUMap<>(
+				PropsValues.CHANGE_TRACKING_SQL_TRANSFORMER_CACHE_SIZE));
+		_productionTransformedSQLs = Collections.synchronizedMap(
+			new LRUMap<>(
+				PropsValues.CHANGE_TRACKING_SQL_TRANSFORMER_CACHE_SIZE));
 
 		_readTransformedSQLsFile();
 
@@ -425,8 +427,8 @@ public class CTSQLTransformerImpl implements CTSQLTransformer {
 	private BundleContext _bundleContext;
 	private ServiceTrackerMap<Class<?>, CTService<?>>
 		_ctServiceServiceTrackerMap;
-	private LRUMap<String, String> _ctTransformedSQLs;
-	private LRUMap<String, String> _productionTransformedSQLs;
+	private Map<String, String> _ctTransformedSQLs;
+	private Map<String, String> _productionTransformedSQLs;
 	private ServiceTracker<?, ?> _releaseServiceTracker;
 
 	private abstract static class BaseStatementVisitor
