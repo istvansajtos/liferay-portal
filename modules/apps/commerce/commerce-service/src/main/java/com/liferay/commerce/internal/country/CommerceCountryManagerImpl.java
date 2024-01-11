@@ -13,9 +13,12 @@ import com.liferay.petra.sql.dsl.expression.Predicate;
 import com.liferay.petra.sql.dsl.query.FromStep;
 import com.liferay.petra.sql.dsl.query.GroupByStep;
 import com.liferay.petra.sql.dsl.query.JoinStep;
+import com.liferay.portal.aop.AopService;
 import com.liferay.portal.kernel.jsonwebservice.JSONWebService;
+import com.liferay.portal.kernel.jsonwebservice.JSONWebServiceMode;
 import com.liferay.portal.kernel.model.Country;
 import com.liferay.portal.kernel.model.CountryTable;
+import com.liferay.portal.kernel.module.framework.service.IdentifiableOSGiService;
 import com.liferay.portal.kernel.service.ClassNameLocalService;
 import com.liferay.portal.kernel.service.CountryLocalService;
 import com.liferay.portal.kernel.util.OrderByComparatorFactoryUtil;
@@ -33,10 +36,19 @@ import org.osgi.service.component.annotations.Reference;
 		"json.web.service.context.name=commerce",
 		"json.web.service.context.path=CommerceCountryManager"
 	},
-	service = CommerceCountryManager.class
+	service = AopService.class
 )
 @JSONWebService
-public class CommerceCountryManagerImpl implements CommerceCountryManager {
+public class CommerceCountryManagerImpl
+	implements AopService, CommerceCountryManager, IdentifiableOSGiService {
+
+	@JSONWebService(mode = JSONWebServiceMode.IGNORE)
+	@Override
+	public Class<?>[] getAopInterfaces() {
+		return new Class<?>[] {
+			CommerceCountryManager.class, IdentifiableOSGiService.class
+		};
+	}
 
 	@Override
 	public List<Country> getBillingCountries(
@@ -76,6 +88,12 @@ public class CommerceCountryManagerImpl implements CommerceCountryManager {
 			).limit(
 				start, end
 			));
+	}
+
+	@JSONWebService(mode = JSONWebServiceMode.IGNORE)
+	@Override
+	public String getOSGiServiceIdentifier() {
+		return CommerceCountryManager.class.getName();
 	}
 
 	@Override
