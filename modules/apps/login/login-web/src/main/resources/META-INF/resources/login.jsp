@@ -118,26 +118,16 @@
 				<liferay-ui:error exception="<%= UserEmailAddressException.MustNotBeNull.class %>" message="please-enter-an-email-address" />
 				<liferay-ui:error exception="<%= UserLockoutException.LDAPLockout.class %>" message="this-account-is-locked" />
 
-				<liferay-ui:error exception="<%= UserLockoutException.PasswordPolicyLockout.class %>">
+				<c:choose>
+					<c:when test="<%= company.isSendPasswordResetLink() %>">
+						<liferay-ui:error exception="<%= UserLockoutException.PasswordPolicyLockout.class %>" message="this-account-may-be-locked"/>
+					</c:when>
 
-					<%
-					UserLockoutException.PasswordPolicyLockout ule = (UserLockoutException.PasswordPolicyLockout)errorException;
-					%>
+					<c:otherwise>
+						<liferay-ui:error exception="<%= UserLockoutException.PasswordPolicyLockout.class %>" message="authentication-failed"/>
+					</c:otherwise>
+				</c:choose>
 
-					<c:choose>
-						<c:when test="<%= ule.passwordPolicy.isRequireUnlock() %>">
-							<liferay-ui:message key="this-account-is-locked" />
-						</c:when>
-						<c:otherwise>
-
-							<%
-							Format dateFormat = FastDateFormatFactoryUtil.getDateTime(FastDateFormatConstants.SHORT, FastDateFormatConstants.LONG, locale, TimeZone.getTimeZone(ule.user.getTimeZoneId()));
-							%>
-
-							<liferay-ui:message arguments="<%= dateFormat.format(ule.user.getUnlockDate()) %>" key="this-account-is-locked-until-x" translateArguments="<%= false %>" />
-						</c:otherwise>
-					</c:choose>
-				</liferay-ui:error>
 
 				<liferay-ui:error exception="<%= UserPasswordException.class %>" message="authentication-failed" />
 				<liferay-ui:error exception="<%= UserScreenNameException.MustNotBeNull.class %>" message="the-screen-name-cannot-be-blank" />
