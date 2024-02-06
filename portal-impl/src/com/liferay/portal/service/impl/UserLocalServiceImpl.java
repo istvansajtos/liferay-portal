@@ -52,6 +52,7 @@ import com.liferay.portal.kernel.exception.UserReminderQueryException;
 import com.liferay.portal.kernel.exception.UserScreenNameException;
 import com.liferay.portal.kernel.exception.UserSmsException;
 import com.liferay.portal.kernel.feature.flag.FeatureFlagManagerUtil;
+import com.liferay.portal.kernel.language.Language;
 import com.liferay.portal.kernel.language.LanguageUtil;
 import com.liferay.portal.kernel.log.Log;
 import com.liferay.portal.kernel.log.LogFactoryUtil;
@@ -140,6 +141,7 @@ import com.liferay.portal.kernel.service.persistence.RolePersistence;
 import com.liferay.portal.kernel.service.persistence.TeamPersistence;
 import com.liferay.portal.kernel.service.persistence.UserGroupPersistence;
 import com.liferay.portal.kernel.service.persistence.UserGroupRolePersistence;
+import com.liferay.portal.kernel.theme.ThemeDisplay;
 import com.liferay.portal.kernel.transaction.Propagation;
 import com.liferay.portal.kernel.transaction.Transactional;
 import com.liferay.portal.kernel.util.ArrayUtil;
@@ -164,6 +166,7 @@ import com.liferay.portal.kernel.util.SetUtil;
 import com.liferay.portal.kernel.util.StringUtil;
 import com.liferay.portal.kernel.util.UnicodeProperties;
 import com.liferay.portal.kernel.util.Validator;
+import com.liferay.portal.kernel.util.WebKeys;
 import com.liferay.portal.kernel.workflow.WorkflowConstants;
 import com.liferay.portal.kernel.workflow.WorkflowHandlerRegistryUtil;
 import com.liferay.portal.kernel.workflow.WorkflowThreadLocal;
@@ -189,6 +192,7 @@ import com.liferay.social.kernel.service.SocialActivityLocalService;
 import com.liferay.social.kernel.service.SocialRequestLocalService;
 import com.liferay.social.kernel.service.persistence.SocialRelationPersistence;
 import com.liferay.users.admin.kernel.file.uploads.UserFileUploadsSettings;
+import jdk.nashorn.internal.ir.annotations.Reference;
 
 import java.io.IOException;
 import java.io.Serializable;
@@ -3982,6 +3986,48 @@ public class UserLocalServiceImpl extends UserLocalServiceBaseImpl {
 		return false;
 	}
 
+
+	/**
+	 * Sends the password lockout email to the user with the email address.
+	 * The content of this email can be specified in
+	 * <code>portal.properties</code> with the
+	 * <code>admin.email.password.lockout</code> keys.
+	 *
+	 * @param companyId the primary key of the user's company
+	 * @param emailAddress the user's email address
+	 * @param fromName the name of the individual that the email should be from
+	 * @param fromAddress the address of the individual that the email should be
+	 *        from
+	 * @param subject the email subject. If <code>null</code>, the subject
+	 *        specified in <code>portal.properties</code> will be used.
+	 * @param body the email body. If <code>null</code>, the body specified in
+	 *        <code>portal.properties</code> will be used.
+	 * @param serviceContext the service context to be applied
+	 */
+	@Override
+	public boolean sendPasswordLockout(
+		long companyId, String emailAddress, String fromName,
+		String fromAddress, String subject, String body,
+		ServiceContext serviceContext)
+		throws PortalException {
+
+		Company company = _companyPersistence.findByPrimaryKey(companyId);
+
+		emailAddress = StringUtil.toLowerCase(StringUtil.trim(emailAddress));
+
+		if (Validator.isNull(emailAddress)) {
+			throw new UserEmailAddressException.MustNotBeNull();
+		}
+
+		User user = userPersistence.findByC_EA(companyId, emailAddress);
+
+		sendPasswordLockoutNotification(
+			user, companyId, fromName, fromAddress,
+			subject, body, serviceContext);
+
+		return false;
+	}
+
 	/**
 	 * Sends a password notification email to the user matching the email
 	 * address. The portal's settings determine whether a password is sent
@@ -6504,6 +6550,91 @@ public class UserLocalServiceImpl extends UserLocalServiceBaseImpl {
 			"Unable to fix the search index after 10 attempts");
 	}
 
+	protected void sendPasswordLockoutNotification(
+		User user, long companyId, String fromName,
+		String fromAddress, String subject, String body,
+		ServiceContext serviceContext) {
+
+		if (Validator.isNull(fromName)) {
+			fromName = PrefsPropsUtil.getString(
+				companyId, PropsKeys.ADMIN_EMAIL_FROM_NAME);
+		}
+
+		if (Validator.isNull(fromAddress)) {
+			fromAddress = PrefsPropsUtil.getString(
+				companyId, PropsKeys.ADMIN_EMAIL_FROM_ADDRESS);
+		}
+
+		String toName = user.getFullName();
+		String toAddress = user.getEmailAddress();
+
+		PortletPreferences companyPortletPreferences =
+			PrefsPropsUtil.getPreferences(companyId);
+
+		String bodyProperty = PropsKeys.ADMIN_EMAIL_PASSWORD_LOCKOUT_BODY;
+		String prefix = "adminEmailPasswordLockout";
+		String subjectProperty = PropsKeys.ADMIN_EMAIL_PASSWORD_LOCKOUT_SUBJECT;
+
+		String localizedBody = body;
+
+		if (Validator.isNull(body)) {
+			Map<Locale, String> localizedBodyMap =
+				LocalizationUtil.getLocalizationMap(
+					companyPortletPreferences, prefix + "Body", bodyProperty);
+
+			localizedBody = _getLocalizedValue(
+				localizedBodyMap, user.getLocale(), LocaleUtil.getDefault());
+		}
+
+		String localizedSubject = subject;
+
+		if (Validator.isNull(subject)) {
+			Map<Locale, String> localizedSubjectMap =
+				LocalizationUtil.getLocalizationMap(
+					companyPortletPreferences, prefix + "Subject",
+					subjectProperty);
+
+			localizedSubject = _getLocalizedValue(
+				localizedSubjectMap, user.getLocale(), LocaleUtil.getDefault());
+		}
+
+		MailTemplateContextBuilder mailTemplateContextBuilder =
+			MailTemplateFactoryUtil.createMailTemplateContextBuilder();
+
+		mailTemplateContextBuilder.put("[$FROM_ADDRESS$]", fromAddress);
+		mailTemplateContextBuilder.put(
+			"[$FROM_NAME$]", new EscapableObject<>(fromName));
+		mailTemplateContextBuilder.put(
+			"[$PORTAL_URL$]", serviceContext.getPortalURL());
+		mailTemplateContextBuilder.put(
+			"[$REMOTE_ADDRESS$]", serviceContext.getRemoteAddr());
+		mailTemplateContextBuilder.put(
+			"[$REMOTE_HOST$]",
+			new EscapableObject<>(serviceContext.getRemoteHost()));
+		mailTemplateContextBuilder.put("[$TO_ADDRESS$]", toAddress);
+		mailTemplateContextBuilder.put(
+			"[$TO_FIRST_NAME$]", new EscapableObject<>(user.getFirstName()));
+		mailTemplateContextBuilder.put(
+			"[$TO_NAME$]", new EscapableObject<>(toName));
+		mailTemplateContextBuilder.put(
+			"[$USER_ID$]", String.valueOf(user.getUserId()));
+		mailTemplateContextBuilder.put(
+			"[$USER_SCREENNAME$]", new EscapableObject<>(user.getScreenName()));
+
+
+		MailTemplateContext mailTemplateContext =
+			mailTemplateContextBuilder.build();
+
+		try {
+			_sendNotificationEmail(
+				fromAddress, fromName, toAddress, user, localizedSubject,
+				localizedBody, mailTemplateContext);
+		}
+		catch (PortalException portalException) {
+			ReflectionUtil.throwException(portalException);
+		}
+	}
+
 	protected void sendPasswordNotification(
 		User user, long companyId, String newPassword, String passwordResetURL,
 		String fromName, String fromAddress, String subject, String body,
@@ -7413,5 +7544,8 @@ public class UserLocalServiceImpl extends UserLocalServiceBaseImpl {
 
 	@BeanReference(type = WorkflowInstanceLinkLocalService.class)
 	private WorkflowInstanceLinkLocalService _workflowInstanceLinkLocalService;
+
+	@Reference
+	private Language _language;
 
 }
