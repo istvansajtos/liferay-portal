@@ -145,6 +145,7 @@ import com.liferay.portal.kernel.theme.ThemeDisplay;
 import com.liferay.portal.kernel.transaction.Propagation;
 import com.liferay.portal.kernel.transaction.Transactional;
 import com.liferay.portal.kernel.util.ArrayUtil;
+import com.liferay.portal.kernel.util.DateFormatFactoryUtil;
 import com.liferay.portal.kernel.util.Digester;
 import com.liferay.portal.kernel.util.DigesterUtil;
 import com.liferay.portal.kernel.util.EscapableObject;
@@ -197,6 +198,7 @@ import jdk.nashorn.internal.ir.annotations.Reference;
 import java.io.IOException;
 import java.io.Serializable;
 
+import java.text.DateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
@@ -6553,7 +6555,9 @@ public class UserLocalServiceImpl extends UserLocalServiceBaseImpl {
 	protected void sendPasswordLockoutNotification(
 		User user, long companyId, String fromName,
 		String fromAddress, String subject, String body,
-		ServiceContext serviceContext) {
+		ServiceContext serviceContext) throws PortalException {
+
+		PasswordPolicy passwordPolicy = user.getPasswordPolicy();
 
 		if (Validator.isNull(fromName)) {
 			fromName = PrefsPropsUtil.getString(
@@ -6574,6 +6578,10 @@ public class UserLocalServiceImpl extends UserLocalServiceBaseImpl {
 		String bodyProperty = PropsKeys.ADMIN_EMAIL_PASSWORD_LOCKOUT_BODY;
 		String prefix = "adminEmailPasswordLockout";
 		String subjectProperty = PropsKeys.ADMIN_EMAIL_PASSWORD_LOCKOUT_SUBJECT;
+
+		if (passwordPolicy.getLockoutDuration() > 0) {
+			bodyProperty = PropsKeys.ADMIN_EMAIL_PASSWORD_LOCKOUT_UNTIL_BODY;
+		}
 
 		String localizedBody = body;
 
@@ -6620,6 +6628,15 @@ public class UserLocalServiceImpl extends UserLocalServiceBaseImpl {
 			"[$USER_ID$]", String.valueOf(user.getUserId()));
 		mailTemplateContextBuilder.put(
 			"[$USER_SCREENNAME$]", new EscapableObject<>(user.getScreenName()));
+
+		if (passwordPolicy.getLockoutDuration() > 0) {
+			DateFormat dateFormat = DateFormatFactoryUtil.getDateTime(user.getLocale());
+
+			mailTemplateContextBuilder.put(
+				"[$TIME_TO_UNLOCK]",
+				new EscapableObject<>(dateFormat.format(user.getUnlockDate()))
+			);
+		}
 
 
 		MailTemplateContext mailTemplateContext =
