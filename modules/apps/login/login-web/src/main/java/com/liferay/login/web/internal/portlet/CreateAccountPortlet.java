@@ -33,7 +33,7 @@ import org.osgi.service.component.annotations.Reference;
 		"javax.portlet.display-name=Create Account",
 		"javax.portlet.expiration-cache=0",
 		"javax.portlet.init-param.add-process-action-success-action=false",
-		"javax.portlet.init-param.config-template=/configuration.jsp",
+		"javax.portlet.init-param.config-template=/configuration_create_account.jsp",
 		"javax.portlet.init-param.template-path=/META-INF/resources/",
 		"javax.portlet.init-param.view-template=/create_account.jsp",
 		"javax.portlet.name=" + LoginPortletKeys.CREATE_ACCOUNT,

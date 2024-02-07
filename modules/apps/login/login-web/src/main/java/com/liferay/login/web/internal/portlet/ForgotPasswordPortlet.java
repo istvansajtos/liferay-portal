@@ -33,7 +33,7 @@ import org.osgi.service.component.annotations.Reference;
 		"javax.portlet.display-name=Forgot Password",
 		"javax.portlet.expiration-cache=0",
 		"javax.portlet.init-param.add-process-action-success-action=false",
-		"javax.portlet.init-param.config-template=/configuration.jsp",
+		"javax.portlet.init-param.config-template=/configuration_forgot_password.jsp",
 		"javax.portlet.init-param.template-path=/META-INF/resources/",
 		"javax.portlet.init-param.view-template=/forgot_password.jsp",
 		"javax.portlet.name=" + LoginPortletKeys.FORGOT_PASSWORD,
