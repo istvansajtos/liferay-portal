@@ -18,8 +18,7 @@ import org.osgi.service.component.annotations.Component;
  */
 @Component(
 	property = {
-		"javax.portlet.name=" + LoginPortletKeys.FAST_LOGIN,
-		"javax.portlet.name=" + LoginPortletKeys.LOGIN,
+		"javax.portlet.name=" + LoginPortletKeys.CREATE_ACCOUNT,
 		"mvc.command.name=/login/create_account"
 	},
 	service = MVCRenderCommand.class

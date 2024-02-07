@@ -21,8 +21,7 @@ import org.osgi.service.component.annotations.Component;
  */
 @Component(
 	property = {
-		"javax.portlet.name=" + LoginPortletKeys.FAST_LOGIN,
-		"javax.portlet.name=" + LoginPortletKeys.LOGIN,
+		"javax.portlet.name=" + LoginPortletKeys.FORGOT_PASSWORD,
 		"mvc.command.name=/login/forgot_password"
 	},
 	service = MVCRenderCommand.class
