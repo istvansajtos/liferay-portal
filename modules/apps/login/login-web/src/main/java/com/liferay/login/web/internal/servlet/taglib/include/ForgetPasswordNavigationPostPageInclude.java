@@ -5,6 +5,7 @@
 
 package com.liferay.login.web.internal.servlet.taglib.include;
 
+import com.liferay.login.web.constants.LoginPortletKeys;
 import com.liferay.portal.kernel.model.Company;
 import com.liferay.portal.kernel.theme.ThemeDisplay;
 import com.liferay.portal.kernel.util.WebKeys;
@@ -58,6 +59,8 @@ public class ForgetPasswordNavigationPostPageInclude implements PageInclude {
 		RenderURLTag renderURLTag = new RenderURLTag();
 
 		renderURLTag.setPageContext(pageContext);
+
+		renderURLTag.setPortletName(LoginPortletKeys.FORGOT_PASSWORD);
 
 		renderURLTag.addParam("saveLastPath", Boolean.FALSE.toString());
 		renderURLTag.addParam("mvcRenderCommandName", "/login/forgot_password");

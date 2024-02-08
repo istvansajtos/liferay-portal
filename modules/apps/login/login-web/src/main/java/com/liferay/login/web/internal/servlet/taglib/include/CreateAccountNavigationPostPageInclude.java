@@ -5,6 +5,7 @@
 
 package com.liferay.login.web.internal.servlet.taglib.include;
 
+import com.liferay.login.web.constants.LoginPortletKeys;
 import com.liferay.portal.kernel.model.Company;
 import com.liferay.portal.kernel.theme.ThemeDisplay;
 import com.liferay.portal.kernel.util.JavaConstants;
@@ -62,7 +63,7 @@ public class CreateAccountNavigationPostPageInclude implements PageInclude {
 			(PortletConfig)httpServletRequest.getAttribute(
 				JavaConstants.JAVAX_PORTLET_CONFIG);
 
-		String portletName = portletConfig.getPortletName();
+		String portletName = LoginPortletKeys.CREATE_ACCOUNT;
 
 		if (portletName.equals(PortletKeys.FAST_LOGIN)) {
 			return;
