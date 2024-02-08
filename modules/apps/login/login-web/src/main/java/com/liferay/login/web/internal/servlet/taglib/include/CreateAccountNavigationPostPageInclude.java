@@ -5,8 +5,14 @@
 
 package com.liferay.login.web.internal.servlet.taglib.include;
 
+import com.liferay.layout.utility.page.service.LayoutUtilityPageEntryLocalService;
+import com.liferay.layout.utility.page.kernel.constants.LayoutUtilityPageEntryConstants;
+import com.liferay.layout.utility.page.model.LayoutUtilityPageEntry;
 import com.liferay.login.web.constants.LoginPortletKeys;
+import com.liferay.portal.kernel.exception.PortalException;
 import com.liferay.portal.kernel.model.Company;
+import com.liferay.portal.kernel.model.Layout;
+import com.liferay.portal.kernel.service.LayoutLocalServiceUtil;
 import com.liferay.portal.kernel.theme.ThemeDisplay;
 import com.liferay.portal.kernel.util.JavaConstants;
 import com.liferay.portal.kernel.util.Portal;
@@ -53,6 +59,32 @@ public class CreateAccountNavigationPostPageInclude implements PageInclude {
 			(ThemeDisplay)httpServletRequest.getAttribute(
 				WebKeys.THEME_DISPLAY);
 
+		String url = null;
+
+		try {
+			LayoutUtilityPageEntry layoutUtilityPageEntry =
+				_layoutUtilityPageEntryLocalService.
+					fetchDefaultLayoutUtilityPageEntry(
+						themeDisplay.getScopeGroupId(),
+						LayoutUtilityPageEntryConstants.TYPE_SC_NOT_FOUND);
+	
+			if (layoutUtilityPageEntry != null) {
+				Layout utilityPage = 
+					LayoutLocalServiceUtil.
+						fetchLayout(layoutUtilityPageEntry.getPlid());
+		
+				url = _portal.getLayoutFullURL(utilityPage, themeDisplay);
+			}
+	
+			if (url == null) {
+				url =
+					_portal.getCreateAccountURL(httpServletRequest, themeDisplay);
+			}
+		}
+		catch (Exception e) {
+			;
+		}
+
 		Company company = themeDisplay.getCompany();
 
 		if (!company.isStrangers()) {
@@ -75,8 +107,7 @@ public class CreateAccountNavigationPostPageInclude implements PageInclude {
 		iconTag.setMessage("create-account");
 
 		try {
-			iconTag.setUrl(
-				_portal.getCreateAccountURL(httpServletRequest, themeDisplay));
+			iconTag.setUrl(url);
 		}
 		catch (Exception exception) {
 			throw new JspException(exception);
@@ -84,6 +115,9 @@ public class CreateAccountNavigationPostPageInclude implements PageInclude {
 
 		iconTag.doTag(pageContext);
 	}
+
+	@Reference
+	private LayoutUtilityPageEntryLocalService _layoutUtilityPageEntryLocalService;
 
 	@Reference
 	private Portal _portal;
