@@ -46,6 +46,9 @@ import com.liferay.portal.kernel.util.WebKeys;
 import com.liferay.portal.security.auth.session.AuthenticatedSessionManagerUtil;
 import com.liferay.portal.util.PropsValues;
 
+import java.util.Iterator;
+import java.util.Set;
+
 import javax.portlet.ActionRequest;
 import javax.portlet.ActionResponse;
 import javax.portlet.PortletPreferences;
@@ -59,9 +62,6 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
-
-import java.util.Iterator;
-import java.util.Set;
 
 /**
  * @author Brian Wing Shun Chan
@@ -133,41 +133,44 @@ public class LoginMVCActionCommand extends BaseMVCActionCommand {
 					SessionErrors.add(actionRequest, exception.getClass());
 				}
 			}
-			else if (exception instanceof UserLockoutException.PasswordPolicyLockout) {
-				User user = _getUser(actionRequest);
+			else if (exception instanceof
+						UserLockoutException.PasswordPolicyLockout) {
 
 				Company company = themeDisplay.getCompany();
 
-				PortletPreferences portletPreferences = actionRequest.getPreferences();
+				if (!company.isSendPasswordResetLink()) {
+					User user = _getUser(actionRequest);
 
-				String languageId = _language.getLanguageId(actionRequest);
+					PortletPreferences portletPreferences =
+						actionRequest.getPreferences();
 
-				String emailFromName = portletPreferences.getValue(
-					"emailFromName", null);
-				String emailFromAddress = portletPreferences.getValue(
-					"emailFromAddress", null);
-				String emailToAddress = user.getEmailAddress();
+					String languageId = _language.getLanguageId(actionRequest);
 
-				String emailParam = "emailPasswordSent";
+					String emailFromName = portletPreferences.getValue(
+						"emailFromName", null);
+					String emailFromAddress = portletPreferences.getValue(
+						"emailFromAddress", null);
+					String emailToAddress = user.getEmailAddress();
 
-				if (company.isSendPasswordResetLink()) {
-					emailParam = "emailPasswordReset";
+					String emailParam = "emailPasswordSent";
+
+					if (company.isSendPasswordResetLink()) {
+						emailParam = "emailPasswordReset";
+					}
+
+					String subject = portletPreferences.getValue(
+						emailParam + "Subject_" + languageId, null);
+					String body = portletPreferences.getValue(
+						emailParam + "Body_" + languageId, null);
+
+					LoginUtil.sendPasswordLockout(
+						actionRequest, emailFromName, emailFromAddress,
+						emailToAddress, subject, body);
 				}
-
-				String subject = portletPreferences.getValue(
-					emailParam + "Subject_" + languageId, null);
-				String body = portletPreferences.getValue(
-					emailParam + "Body_" + languageId, null);
-
-				LoginUtil.sendPasswordLockout(
-					actionRequest, emailFromName, emailFromAddress,
-					emailToAddress, subject, body
-				);
 
 				SessionErrors.add(
 					actionRequest, exception.getClass(), exception);
 			}
-
 			else if (exception instanceof CompanyMaxUsersException ||
 					 exception instanceof CookieNotSupportedException ||
 					 exception instanceof NoSuchUserException ||
@@ -286,52 +289,6 @@ public class LoginMVCActionCommand extends BaseMVCActionCommand {
 		}
 	}
 
-	private void _postProcessAuthFailure(
-			ActionRequest actionRequest, ActionResponse actionResponse)
-		throws Exception {
-
-		LiferayPortletRequest liferayPortletRequest =
-			_portal.getLiferayPortletRequest(actionRequest);
-
-		String portletName = liferayPortletRequest.getPortletName();
-
-		Layout layout = (Layout)actionRequest.getAttribute(WebKeys.LAYOUT);
-
-		PortletURL portletURL = PortletURLBuilder.create(
-			PortletURLFactoryUtil.create(
-				actionRequest, liferayPortletRequest.getPortlet(), layout,
-				PortletRequest.RENDER_PHASE)
-		).setRedirect(
-			() -> {
-				String redirect = ParamUtil.getString(
-					actionRequest, "redirect");
-
-				if (Validator.isNotNull(redirect)) {
-					return redirect;
-				}
-
-				return null;
-			}
-		).setParameter(
-			"saveLastPath", false
-		).buildPortletURL();
-
-		String login = ParamUtil.getString(actionRequest, "login");
-
-		if (Validator.isNotNull(login)) {
-			SessionErrors.add(actionRequest, "login", login);
-		}
-
-		if (portletName.equals(LoginPortletKeys.LOGIN)) {
-			portletURL.setWindowState(WindowState.MAXIMIZED);
-		}
-		else {
-			portletURL.setWindowState(actionRequest.getWindowState());
-		}
-
-		actionResponse.sendRedirect(portletURL.toString());
-	}
-
 	private User _getUser(ActionRequest actionRequest) throws Exception {
 		try {
 			User user = null;
@@ -420,14 +377,60 @@ public class LoginMVCActionCommand extends BaseMVCActionCommand {
 		return guestUser;
 	}
 
+	private void _postProcessAuthFailure(
+			ActionRequest actionRequest, ActionResponse actionResponse)
+		throws Exception {
+
+		LiferayPortletRequest liferayPortletRequest =
+			_portal.getLiferayPortletRequest(actionRequest);
+
+		String portletName = liferayPortletRequest.getPortletName();
+
+		Layout layout = (Layout)actionRequest.getAttribute(WebKeys.LAYOUT);
+
+		PortletURL portletURL = PortletURLBuilder.create(
+			PortletURLFactoryUtil.create(
+				actionRequest, liferayPortletRequest.getPortlet(), layout,
+				PortletRequest.RENDER_PHASE)
+		).setRedirect(
+			() -> {
+				String redirect = ParamUtil.getString(
+					actionRequest, "redirect");
+
+				if (Validator.isNotNull(redirect)) {
+					return redirect;
+				}
+
+				return null;
+			}
+		).setParameter(
+			"saveLastPath", false
+		).buildPortletURL();
+
+		String login = ParamUtil.getString(actionRequest, "login");
+
+		if (Validator.isNotNull(login)) {
+			SessionErrors.add(actionRequest, "login", login);
+		}
+
+		if (portletName.equals(LoginPortletKeys.LOGIN)) {
+			portletURL.setWindowState(WindowState.MAXIMIZED);
+		}
+		else {
+			portletURL.setWindowState(actionRequest.getWindowState());
+		}
+
+		actionResponse.sendRedirect(portletURL.toString());
+	}
+
 	private static final Log _log = LogFactoryUtil.getLog(
 		LoginMVCActionCommand.class);
 
 	@Reference
-	private Portal _portal;
+	private Language _language;
 
 	@Reference
-	private Language _language;
+	private Portal _portal;
 
 	@Reference
 	private UserLocalService _userLocalService;

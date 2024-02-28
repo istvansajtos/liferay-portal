@@ -120,14 +120,12 @@
 
 				<c:choose>
 					<c:when test="<%= company.isSendPasswordResetLink() %>">
-						<liferay-ui:error exception="<%= UserLockoutException.PasswordPolicyLockout.class %>" message="this-account-may-be-locked"/>
+						<liferay-ui:error exception="<%= UserLockoutException.PasswordPolicyLockout.class %>" message="this-account-may-be-locked" />
 					</c:when>
-
 					<c:otherwise>
-						<liferay-ui:error exception="<%= UserLockoutException.PasswordPolicyLockout.class %>" message="authentication-failed"/>
+						<liferay-ui:error exception="<%= UserLockoutException.PasswordPolicyLockout.class %>" message="authentication-failed" />
 					</c:otherwise>
 				</c:choose>
-
 
 				<liferay-ui:error exception="<%= UserPasswordException.class %>" message="authentication-failed" />
 				<liferay-ui:error exception="<%= UserScreenNameException.MustNotBeNull.class %>" message="the-screen-name-cannot-be-blank" />

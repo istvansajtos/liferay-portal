@@ -228,8 +228,8 @@ public class LoginUtil {
 	}
 
 	public static void sendPasswordLockout(
-		ActionRequest actionRequest, String fromName, String fromAddress,
-		String toAddress, String subject, String body)
+			ActionRequest actionRequest, String fromName, String fromAddress,
+			String toAddress, String subject, String body)
 		throws Exception {
 
 		HttpServletRequest httpServletRequest =
