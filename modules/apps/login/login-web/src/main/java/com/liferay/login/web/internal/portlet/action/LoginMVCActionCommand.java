@@ -46,9 +46,6 @@ import com.liferay.portal.kernel.util.WebKeys;
 import com.liferay.portal.security.auth.session.AuthenticatedSessionManagerUtil;
 import com.liferay.portal.util.PropsValues;
 
-import java.util.Iterator;
-import java.util.Set;
-
 import javax.portlet.ActionRequest;
 import javax.portlet.ActionResponse;
 import javax.portlet.PortletPreferences;
@@ -152,11 +149,7 @@ public class LoginMVCActionCommand extends BaseMVCActionCommand {
 						"emailFromAddress", null);
 					String emailToAddress = user.getEmailAddress();
 
-					String emailParam = "emailPasswordSent";
-
-					if (company.isSendPasswordResetLink()) {
-						emailParam = "emailPasswordReset";
-					}
+					String emailParam = "emailPasswordLockout";
 
 					String subject = portletPreferences.getValue(
 						emailParam + "Subject_" + languageId, null);
@@ -290,91 +283,54 @@ public class LoginMVCActionCommand extends BaseMVCActionCommand {
 	}
 
 	private User _getUser(ActionRequest actionRequest) throws Exception {
-		try {
-			User user = null;
-
-			ThemeDisplay themeDisplay =
-				(ThemeDisplay)actionRequest.getAttribute(WebKeys.THEME_DISPLAY);
-
-			String authType = null;
-
-			PortletPreferences portletPreferences =
-				actionRequest.getPreferences();
-
-			if (portletPreferences != null) {
-				authType = portletPreferences.getValue("authType", null);
-			}
-
-			if (Validator.isNull(authType)) {
-				Company company = themeDisplay.getCompany();
-
-				authType = company.getAuthType();
-			}
-
-			PortletSession portletSession = actionRequest.getPortletSession();
-
-			String login = (String)portletSession.getAttribute(
-				WebKeys.FORGOT_PASSWORD_REMINDER_USER_EMAIL_ADDRESS);
-
-			if (Validator.isNull(login)) {
-				login = ParamUtil.getString(actionRequest, "login");
-			}
-
-			if (authType.equals(CompanyConstants.AUTH_TYPE_EA)) {
-				user = _userLocalService.getUserByEmailAddress(
-					themeDisplay.getCompanyId(), login);
-			}
-			else if (authType.equals(CompanyConstants.AUTH_TYPE_SN)) {
-				user = _userLocalService.getUserByScreenName(
-					themeDisplay.getCompanyId(), login);
-			}
-			else if (authType.equals(CompanyConstants.AUTH_TYPE_ID)) {
-				user = _userLocalService.getUserById(GetterUtil.getLong(login));
-			}
-			else {
-				throw new NoSuchUserException("User does not exist");
-			}
-
-			if (!user.isActive()) {
-				throw new UserActiveException(
-					"Inactive user " + user.getUuid());
-			}
-
-			return user;
-		}
-		catch (Exception exception) {
-			if (_log.isDebugEnabled()) {
-				_log.debug(
-					"Unable to get user: " + exception.getMessage(), exception);
-			}
-
-			if (!PropsValues.LOGIN_SECURE_FORGOT_PASSWORD) {
-				throw exception;
-			}
-		}
+		User user = null;
 
 		ThemeDisplay themeDisplay = (ThemeDisplay)actionRequest.getAttribute(
 			WebKeys.THEME_DISPLAY);
 
-		User guestUser = _userLocalService.getGuestUser(
-			themeDisplay.getCompanyId());
+		String authType = null;
 
-		Set<String> reminderQueryQuestions =
-			guestUser.getReminderQueryQuestions();
+		PortletPreferences portletPreferences = actionRequest.getPreferences();
 
-		if (!reminderQueryQuestions.isEmpty()) {
-			Iterator<String> iterator = reminderQueryQuestions.iterator();
+		if (portletPreferences != null) {
+			authType = portletPreferences.getValue("authType", null);
+		}
 
-			guestUser.setReminderQueryQuestion(iterator.next());
+		if (Validator.isNull(authType)) {
+			Company company = themeDisplay.getCompany();
+
+			authType = company.getAuthType();
+		}
+
+		PortletSession portletSession = actionRequest.getPortletSession();
+
+		String login = (String)portletSession.getAttribute(
+			WebKeys.FORGOT_PASSWORD_REMINDER_USER_EMAIL_ADDRESS);
+
+		if (Validator.isNull(login)) {
+			login = ParamUtil.getString(actionRequest, "login");
+		}
+
+		if (authType.equals(CompanyConstants.AUTH_TYPE_EA)) {
+			user = _userLocalService.getUserByEmailAddress(
+				themeDisplay.getCompanyId(), login);
+		}
+		else if (authType.equals(CompanyConstants.AUTH_TYPE_SN)) {
+			user = _userLocalService.getUserByScreenName(
+				themeDisplay.getCompanyId(), login);
+		}
+		else if (authType.equals(CompanyConstants.AUTH_TYPE_ID)) {
+			user = _userLocalService.getUserById(GetterUtil.getLong(login));
 		}
 		else {
-			guestUser.setReminderQueryQuestion(
-				"what-is-your-library-card-number");
+			throw new NoSuchUserException("User does not exist");
 		}
 
-		guestUser.setReminderQueryAnswer(guestUser.getReminderQueryQuestion());
+		if (!user.isActive()) {
+			throw new UserActiveException("Inactive user " + user.getUuid());
+		}
 
-		return guestUser;
+		return user;
 	}
 
 	private void _postProcessAuthFailure(

@@ -157,6 +157,7 @@ import com.liferay.portal.kernel.util.LocalizationUtil;
 import com.liferay.portal.kernel.util.MapUtil;
 import com.liferay.portal.kernel.util.OrderByComparator;
 import com.liferay.portal.kernel.util.ParamUtil;
+import com.liferay.portal.kernel.util.PortalClassLoaderUtil;
 import com.liferay.portal.kernel.util.PortalUtil;
 import com.liferay.portal.kernel.util.PortletKeys;
 import com.liferay.portal.kernel.util.PrefsPropsUtil;
@@ -217,8 +218,6 @@ import java.util.concurrent.ConcurrentHashMap;
 import javax.mail.internet.InternetAddress;
 
 import javax.portlet.PortletPreferences;
-
-import jdk.nashorn.internal.ir.annotations.Reference;
 
 /**
  * Provides the local service for accessing, adding, authenticating, deleting,
@@ -6568,40 +6567,32 @@ public class UserLocalServiceImpl extends UserLocalServiceBaseImpl {
 		String toName = user.getFullName();
 		String toAddress = user.getEmailAddress();
 
-		PortletPreferences companyPortletPreferences =
-			PrefsPropsUtil.getPreferences(companyId);
-
-		String bodyProperty = PropsKeys.ADMIN_EMAIL_PASSWORD_LOCKOUT_BODY;
-		String prefix = "adminEmailPasswordLockout";
-
-		if (passwordPolicy.getLockoutDuration() > 0) {
-			bodyProperty = PropsKeys.ADMIN_EMAIL_PASSWORD_LOCKOUT_UNTIL_BODY;
-		}
-
-		String localizedBody = body;
-
 		if (Validator.isNull(body)) {
-			Map<Locale, String> localizedBodyMap =
-				LocalizationUtil.getLocalizationMap(
-					companyPortletPreferences, prefix + "Body", bodyProperty);
+			try {
+				body = StringUtil.read(
+					PortalClassLoaderUtil.getClassLoader(),
+					PropsValues.ADMIN_EMAIL_PASSWORD_LOCKOUT_BODY);
 
-			localizedBody = _getLocalizedValue(
-				localizedBodyMap, user.getLocale(), LocaleUtil.getDefault());
+				if (passwordPolicy.getLockoutDuration() > 0) {
+					body = StringUtil.read(
+						PortalClassLoaderUtil.getClassLoader(),
+						PropsValues.ADMIN_EMAIL_PASSWORD_LOCKOUT_UNTIL_BODY);
+				}
+			}
+			catch (IOException ioException) {
+				_log.error("Unable to read the content", ioException);
+			}
 		}
-
-		String localizedSubject = subject;
 
 		if (Validator.isNull(subject)) {
-			String subjectProperty =
-				PropsKeys.ADMIN_EMAIL_PASSWORD_LOCKOUT_SUBJECT;
-
-			Map<Locale, String> localizedSubjectMap =
-				LocalizationUtil.getLocalizationMap(
-					companyPortletPreferences, prefix + "Subject",
-					subjectProperty);
-
-			localizedSubject = _getLocalizedValue(
-				localizedSubjectMap, user.getLocale(), LocaleUtil.getDefault());
+			try {
+				subject = StringUtil.read(
+					PortalClassLoaderUtil.getClassLoader(),
+					PropsValues.ADMIN_EMAIL_PASSWORD_LOCKOUT_SUBJECT);
+			}
+			catch (IOException ioException) {
+				_log.error("Unable to read the content", ioException);
+			}
 		}
 
 		MailTemplateContextBuilder mailTemplateContextBuilder =
@@ -6641,8 +6632,8 @@ public class UserLocalServiceImpl extends UserLocalServiceBaseImpl {
 
 		try {
 			_sendNotificationEmail(
-				fromAddress, fromName, toAddress, user, localizedSubject,
-				localizedBody, mailTemplateContext);
+				fromAddress, fromName, toAddress, user, subject, body,
+				mailTemplateContext);
 		}
 		catch (PortalException portalException) {
 			ReflectionUtil.throwException(portalException);
