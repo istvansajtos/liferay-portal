@@ -5,6 +5,7 @@
 
 package com.liferay.login.web.internal.servlet.taglib.include;
 
+import com.liferay.portal.kernel.feature.flag.FeatureFlagManager;
 import com.liferay.portal.kernel.portlet.LiferayWindowState;
 import com.liferay.portal.kernel.portlet.PortletURLFactoryUtil;
 import com.liferay.portal.kernel.portlet.url.builder.PortletURLBuilder;
@@ -29,6 +30,7 @@ import javax.servlet.jsp.JspException;
 import javax.servlet.jsp.PageContext;
 
 import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.Reference;
 
 /**
  * @author Shuyang Zhou
@@ -46,13 +48,26 @@ public class SignInNavigationPrePageInclude implements PageInclude {
 		HttpServletRequest httpServletRequest =
 			(HttpServletRequest)pageContext.getRequest();
 
-		String mvcRenderCommandName = httpServletRequest.getParameter(
-			"mvcRenderCommandName");
+		PortletConfig portletConfig =
+			(PortletConfig)httpServletRequest.getAttribute(
+				JavaConstants.JAVAX_PORTLET_CONFIG);
 
-		if (Validator.isNull(mvcRenderCommandName) ||
-			Objects.equals(mvcRenderCommandName, "/login/login")) {
+		String portletName = portletConfig.getPortletName();
 
-			return;
+		if (_featureFlagManager.isEnabled("LPD-6378")) {
+			if (portletName.equals(PortletKeys.LOGIN)) {
+				return;
+			}
+		}
+		else {
+			String mvcRenderCommandName = httpServletRequest.getParameter(
+				"mvcRenderCommandName");
+
+			if (Validator.isNull(mvcRenderCommandName) ||
+				Objects.equals(mvcRenderCommandName, "/login/login")) {
+
+				return;
+			}
 		}
 
 		ThemeDisplay themeDisplay =
@@ -60,12 +75,6 @@ public class SignInNavigationPrePageInclude implements PageInclude {
 				WebKeys.THEME_DISPLAY);
 
 		String signInURL = themeDisplay.getURLSignIn();
-
-		PortletConfig portletConfig =
-			(PortletConfig)httpServletRequest.getAttribute(
-				JavaConstants.JAVAX_PORTLET_CONFIG);
-
-		String portletName = portletConfig.getPortletName();
 
 		if (portletName.equals(PortletKeys.FAST_LOGIN)) {
 			PortletURL fastLoginURL = PortletURLBuilder.create(
@@ -97,5 +106,8 @@ public class SignInNavigationPrePageInclude implements PageInclude {
 
 		iconTag.doTag(pageContext);
 	}
+
+	@Reference
+	private FeatureFlagManager _featureFlagManager;
 
 }

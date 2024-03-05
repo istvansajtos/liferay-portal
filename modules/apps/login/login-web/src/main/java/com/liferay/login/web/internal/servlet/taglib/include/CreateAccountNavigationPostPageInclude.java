@@ -5,6 +5,8 @@
 
 package com.liferay.login.web.internal.servlet.taglib.include;
 
+import com.liferay.login.web.constants.LoginPortletKeys;
+import com.liferay.portal.kernel.feature.flag.FeatureFlagManager;
 import com.liferay.portal.kernel.model.Company;
 import com.liferay.portal.kernel.theme.ThemeDisplay;
 import com.liferay.portal.kernel.util.JavaConstants;
@@ -41,11 +43,26 @@ public class CreateAccountNavigationPostPageInclude implements PageInclude {
 		HttpServletRequest httpServletRequest =
 			(HttpServletRequest)pageContext.getRequest();
 
-		String mvcRenderCommandName = httpServletRequest.getParameter(
-			"mvcRenderCommandName");
+		if (_featureFlagManager.isEnabled("LPD-6378")) {
+			PortletConfig portletConfig =
+				(PortletConfig)httpServletRequest.getAttribute(
+					JavaConstants.JAVAX_PORTLET_CONFIG);
 
-		if (Objects.equals(mvcRenderCommandName, "/login/create_account")) {
-			return;
+			String portletName = portletConfig.getPortletName();
+
+			if (portletName.equals(LoginPortletKeys.CREATE_ACCOUNT) ||
+				portletName.equals(PortletKeys.FAST_LOGIN)) {
+
+				return;
+			}
+		}
+		else {
+			String mvcRenderCommandName = httpServletRequest.getParameter(
+				"mvcRenderCommandName");
+
+			if (Objects.equals(mvcRenderCommandName, "/login/create_account")) {
+				return;
+			}
 		}
 
 		ThemeDisplay themeDisplay =
@@ -55,16 +72,6 @@ public class CreateAccountNavigationPostPageInclude implements PageInclude {
 		Company company = themeDisplay.getCompany();
 
 		if (!company.isStrangers()) {
-			return;
-		}
-
-		PortletConfig portletConfig =
-			(PortletConfig)httpServletRequest.getAttribute(
-				JavaConstants.JAVAX_PORTLET_CONFIG);
-
-		String portletName = portletConfig.getPortletName();
-
-		if (portletName.equals(PortletKeys.FAST_LOGIN)) {
 			return;
 		}
 
@@ -83,6 +90,9 @@ public class CreateAccountNavigationPostPageInclude implements PageInclude {
 
 		iconTag.doTag(pageContext);
 	}
+
+	@Reference
+	private FeatureFlagManager _featureFlagManager;
 
 	@Reference
 	private Portal _portal;

@@ -42,6 +42,7 @@ import com.liferay.portal.kernel.exception.NoSuchUserException;
 import com.liferay.portal.kernel.exception.PortalException;
 import com.liferay.portal.kernel.exception.RSSFeedException;
 import com.liferay.portal.kernel.exception.SystemException;
+import com.liferay.portal.kernel.feature.flag.FeatureFlagManagerUtil;
 import com.liferay.portal.kernel.image.ImageBag;
 import com.liferay.portal.kernel.instance.PortalInstancePool;
 import com.liferay.portal.kernel.language.LanguageUtil;
@@ -1911,9 +1912,14 @@ public class PortalImpl implements Portal {
 					layout.getGroupId(), false);
 			}
 
+			String portletKey = PortletKeys.CREATE_ACCOUNT;
+
+			if (!FeatureFlagManagerUtil.isEnabled("LPD-6378")) {
+				portletKey = PortletKeys.LOGIN;
+			}
 			PortletURL createAccountURL = PortletURLBuilder.create(
 				PortletURLFactoryUtil.create(
-					httpServletRequest, PortletKeys.LOGIN, plid,
+					httpServletRequest, portletKey, plid,
 					PortletRequest.RENDER_PHASE)
 			).setMVCRenderCommandName(
 				"/login/create_account"

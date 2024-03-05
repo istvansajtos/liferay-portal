@@ -35,6 +35,9 @@ public class PortletKeys {
 
 	public static final String CALENDAR = "8";
 
+	public static final String CREATE_ACCOUNT =
+		"com_liferay_login_web_portlet_CreateAccountPortlet";
+
 	public static final String DIRECTORY =
 		"com_liferay_directory_web_portlet_DirectoryPortlet";
 
