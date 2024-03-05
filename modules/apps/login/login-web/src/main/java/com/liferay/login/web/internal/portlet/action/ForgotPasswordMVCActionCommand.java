@@ -59,6 +59,7 @@ import org.osgi.service.component.annotations.Reference;
 @Component(
 	property = {
 		"javax.portlet.name=" + LoginPortletKeys.FAST_LOGIN,
+		"javax.portlet.name=" + LoginPortletKeys.FORGOT_PASSWORD,
 		"javax.portlet.name=" + LoginPortletKeys.LOGIN,
 		"mvc.command.name=/login/forgot_password"
 	},
