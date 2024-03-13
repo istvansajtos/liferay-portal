@@ -18,7 +18,6 @@ import com.liferay.portal.kernel.exception.UserIdException;
 import com.liferay.portal.kernel.exception.UserLockoutException;
 import com.liferay.portal.kernel.exception.UserPasswordException;
 import com.liferay.portal.kernel.exception.UserScreenNameException;
-import com.liferay.portal.kernel.language.Language;
 import com.liferay.portal.kernel.log.Log;
 import com.liferay.portal.kernel.log.LogFactoryUtil;
 import com.liferay.portal.kernel.model.Company;
@@ -59,9 +58,6 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
-
-import java.util.Iterator;
-import java.util.Set;
 
 /**
  * @author Brian Wing Shun Chan
@@ -133,41 +129,32 @@ public class LoginMVCActionCommand extends BaseMVCActionCommand {
 					SessionErrors.add(actionRequest, exception.getClass());
 				}
 			}
-			else if (exception instanceof UserLockoutException.PasswordPolicyLockout) {
-				User user = _getUser(actionRequest);
+			else if (exception instanceof
+						UserLockoutException.PasswordPolicyLockout) {
 
 				Company company = themeDisplay.getCompany();
 
-				PortletPreferences portletPreferences = actionRequest.getPreferences();
+				if (!company.isSendPasswordResetLink()) {
+					User user = _getUser(actionRequest);
 
-				String languageId = _language.getLanguageId(actionRequest);
+					PortletPreferences portletPreferences =
+						actionRequest.getPreferences();
 
-				String emailFromName = portletPreferences.getValue(
-					"emailFromName", null);
-				String emailFromAddress = portletPreferences.getValue(
-					"emailFromAddress", null);
-				String emailToAddress = user.getEmailAddress();
+					String emailFromName = portletPreferences.getValue(
+						"emailFromName", null);
+					String emailFromAddress = portletPreferences.getValue(
+						"emailFromAddress", null);
 
-				String emailParam = "emailPasswordSent";
+					String emailToAddress = user.getEmailAddress();
 
-				if (company.isSendPasswordResetLink()) {
-					emailParam = "emailPasswordReset";
+					LoginUtil.sendPasswordLockout(
+						actionRequest, emailFromName, emailFromAddress,
+						emailToAddress, null, null);
 				}
-
-				String subject = portletPreferences.getValue(
-					emailParam + "Subject_" + languageId, null);
-				String body = portletPreferences.getValue(
-					emailParam + "Body_" + languageId, null);
-
-				LoginUtil.sendPasswordLockout(
-					actionRequest, emailFromName, emailFromAddress,
-					emailToAddress, subject, body
-				);
 
 				SessionErrors.add(
 					actionRequest, exception.getClass(), exception);
 			}
-
 			else if (exception instanceof CompanyMaxUsersException ||
 					 exception instanceof CookieNotSupportedException ||
 					 exception instanceof NoSuchUserException ||
@@ -286,6 +273,53 @@ public class LoginMVCActionCommand extends BaseMVCActionCommand {
 		}
 	}
 
+	private User _getUser(ActionRequest actionRequest) throws Exception {
+		User user = null;
+
+		ThemeDisplay themeDisplay = (ThemeDisplay)actionRequest.getAttribute(
+			WebKeys.THEME_DISPLAY);
+
+		PortletPreferences portletPreferences = actionRequest.getPreferences();
+
+		String authType = portletPreferences.getValue("authType", null);
+
+		if (Validator.isNull(authType)) {
+			Company company = themeDisplay.getCompany();
+
+			authType = company.getAuthType();
+		}
+
+		PortletSession portletSession = actionRequest.getPortletSession();
+
+		String login = (String)portletSession.getAttribute(
+			WebKeys.FORGOT_PASSWORD_REMINDER_USER_EMAIL_ADDRESS);
+
+		if (Validator.isNull(login)) {
+			login = ParamUtil.getString(actionRequest, "login");
+		}
+
+		if (authType.equals(CompanyConstants.AUTH_TYPE_EA)) {
+			user = _userLocalService.getUserByEmailAddress(
+				themeDisplay.getCompanyId(), login);
+		}
+		else if (authType.equals(CompanyConstants.AUTH_TYPE_SN)) {
+			user = _userLocalService.getUserByScreenName(
+				themeDisplay.getCompanyId(), login);
+		}
+		else if (authType.equals(CompanyConstants.AUTH_TYPE_ID)) {
+			user = _userLocalService.getUserById(GetterUtil.getLong(login));
+		}
+		else {
+			throw new NoSuchUserException("User does not exist");
+		}
+
+		if (!user.isActive()) {
+			throw new UserActiveException("Inactive user " + user.getUuid());
+		}
+
+		return user;
+	}
+
 	private void _postProcessAuthFailure(
 			ActionRequest actionRequest, ActionResponse actionResponse)
 		throws Exception {
@@ -332,102 +366,11 @@ public class LoginMVCActionCommand extends BaseMVCActionCommand {
 		actionResponse.sendRedirect(portletURL.toString());
 	}
 
-	private User _getUser(ActionRequest actionRequest) throws Exception {
-		try {
-			User user = null;
-
-			ThemeDisplay themeDisplay =
-				(ThemeDisplay)actionRequest.getAttribute(WebKeys.THEME_DISPLAY);
-
-			String authType = null;
-
-			PortletPreferences portletPreferences =
-				actionRequest.getPreferences();
-
-			if (portletPreferences != null) {
-				authType = portletPreferences.getValue("authType", null);
-			}
-
-			if (Validator.isNull(authType)) {
-				Company company = themeDisplay.getCompany();
-
-				authType = company.getAuthType();
-			}
-
-			PortletSession portletSession = actionRequest.getPortletSession();
-
-			String login = (String)portletSession.getAttribute(
-				WebKeys.FORGOT_PASSWORD_REMINDER_USER_EMAIL_ADDRESS);
-
-			if (Validator.isNull(login)) {
-				login = ParamUtil.getString(actionRequest, "login");
-			}
-
-			if (authType.equals(CompanyConstants.AUTH_TYPE_EA)) {
-				user = _userLocalService.getUserByEmailAddress(
-					themeDisplay.getCompanyId(), login);
-			}
-			else if (authType.equals(CompanyConstants.AUTH_TYPE_SN)) {
-				user = _userLocalService.getUserByScreenName(
-					themeDisplay.getCompanyId(), login);
-			}
-			else if (authType.equals(CompanyConstants.AUTH_TYPE_ID)) {
-				user = _userLocalService.getUserById(GetterUtil.getLong(login));
-			}
-			else {
-				throw new NoSuchUserException("User does not exist");
-			}
-
-			if (!user.isActive()) {
-				throw new UserActiveException(
-					"Inactive user " + user.getUuid());
-			}
-
-			return user;
-		}
-		catch (Exception exception) {
-			if (_log.isDebugEnabled()) {
-				_log.debug(
-					"Unable to get user: " + exception.getMessage(), exception);
-			}
-
-			if (!PropsValues.LOGIN_SECURE_FORGOT_PASSWORD) {
-				throw exception;
-			}
-		}
-
-		ThemeDisplay themeDisplay = (ThemeDisplay)actionRequest.getAttribute(
-			WebKeys.THEME_DISPLAY);
-
-		User guestUser = _userLocalService.getGuestUser(
-			themeDisplay.getCompanyId());
-
-		Set<String> reminderQueryQuestions =
-			guestUser.getReminderQueryQuestions();
-
-		if (!reminderQueryQuestions.isEmpty()) {
-			Iterator<String> iterator = reminderQueryQuestions.iterator();
-
-			guestUser.setReminderQueryQuestion(iterator.next());
-		}
-		else {
-			guestUser.setReminderQueryQuestion(
-				"what-is-your-library-card-number");
-		}
-
-		guestUser.setReminderQueryAnswer(guestUser.getReminderQueryQuestion());
-
-		return guestUser;
-	}
-
 	private static final Log _log = LogFactoryUtil.getLog(
 		LoginMVCActionCommand.class);
 
 	@Reference
 	private Portal _portal;
-
-	@Reference
-	private Language _language;
 
 	@Reference
 	private UserLocalService _userLocalService;
