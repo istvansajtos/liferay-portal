@@ -141,7 +141,6 @@ import com.liferay.portal.kernel.service.persistence.RolePersistence;
 import com.liferay.portal.kernel.service.persistence.TeamPersistence;
 import com.liferay.portal.kernel.service.persistence.UserGroupPersistence;
 import com.liferay.portal.kernel.service.persistence.UserGroupRolePersistence;
-import com.liferay.portal.kernel.theme.ThemeDisplay;
 import com.liferay.portal.kernel.transaction.Propagation;
 import com.liferay.portal.kernel.transaction.Transactional;
 import com.liferay.portal.kernel.util.ArrayUtil;
@@ -166,7 +165,6 @@ import com.liferay.portal.kernel.util.SetUtil;
 import com.liferay.portal.kernel.util.StringUtil;
 import com.liferay.portal.kernel.util.UnicodeProperties;
 import com.liferay.portal.kernel.util.Validator;
-import com.liferay.portal.kernel.util.WebKeys;
 import com.liferay.portal.kernel.workflow.WorkflowConstants;
 import com.liferay.portal.kernel.workflow.WorkflowHandlerRegistryUtil;
 import com.liferay.portal.kernel.workflow.WorkflowThreadLocal;
@@ -192,7 +190,6 @@ import com.liferay.social.kernel.service.SocialActivityLocalService;
 import com.liferay.social.kernel.service.SocialRequestLocalService;
 import com.liferay.social.kernel.service.persistence.SocialRelationPersistence;
 import com.liferay.users.admin.kernel.file.uploads.UserFileUploadsSettings;
-import jdk.nashorn.internal.ir.annotations.Reference;
 
 import java.io.IOException;
 import java.io.Serializable;
@@ -218,6 +215,8 @@ import java.util.concurrent.ConcurrentHashMap;
 import javax.mail.internet.InternetAddress;
 
 import javax.portlet.PortletPreferences;
+
+import jdk.nashorn.internal.ir.annotations.Reference;
 
 /**
  * Provides the local service for accessing, adding, authenticating, deleting,
@@ -3985,48 +3984,6 @@ public class UserLocalServiceImpl extends UserLocalServiceBaseImpl {
 		return false;
 	}
 
-
-	/**
-	 * Sends the password lockout email to the user with the email address.
-	 * The content of this email can be specified in
-	 * <code>portal.properties</code> with the
-	 * <code>admin.email.password.lockout</code> keys.
-	 *
-	 * @param companyId the primary key of the user's company
-	 * @param emailAddress the user's email address
-	 * @param fromName the name of the individual that the email should be from
-	 * @param fromAddress the address of the individual that the email should be
-	 *        from
-	 * @param subject the email subject. If <code>null</code>, the subject
-	 *        specified in <code>portal.properties</code> will be used.
-	 * @param body the email body. If <code>null</code>, the body specified in
-	 *        <code>portal.properties</code> will be used.
-	 * @param serviceContext the service context to be applied
-	 */
-	@Override
-	public boolean sendPasswordLockout(
-		long companyId, String emailAddress, String fromName,
-		String fromAddress, String subject, String body,
-		ServiceContext serviceContext)
-		throws PortalException {
-
-		Company company = _companyPersistence.findByPrimaryKey(companyId);
-
-		emailAddress = StringUtil.toLowerCase(StringUtil.trim(emailAddress));
-
-		if (Validator.isNull(emailAddress)) {
-			throw new UserEmailAddressException.MustNotBeNull();
-		}
-
-		User user = userPersistence.findByC_EA(companyId, emailAddress);
-
-		sendPasswordLockoutNotification(
-			user, companyId, fromName, fromAddress,
-			subject, body, serviceContext);
-
-		return false;
-	}
-
 	/**
 	 * Sends a password notification email to the user matching the email
 	 * address. The portal's settings determine whether a password is sent
@@ -4114,6 +4071,47 @@ public class UserLocalServiceImpl extends UserLocalServiceBaseImpl {
 		return sendPassword(
 			user.getCompanyId(), user.getEmailAddress(), null, null, null, null,
 			ServiceContextThreadLocal.getServiceContext());
+	}
+
+	/**
+	 * Sends the password lockout email to the user with the email address.
+	 * The content of this email can be specified in
+	 * <code>portal.properties</code> with the
+	 * <code>admin.email.password.lockout</code> keys.
+	 *
+	 * @param companyId the primary key of the user's company
+	 * @param emailAddress the user's email address
+	 * @param fromName the name of the individual that the email should be from
+	 * @param fromAddress the address of the individual that the email should be
+	 *        from
+	 * @param subject the email subject. If <code>null</code>, the subject
+	 *        specified in <code>portal.properties</code> will be used.
+	 * @param body the email body. If <code>null</code>, the body specified in
+	 *        <code>portal.properties</code> will be used.
+	 * @param serviceContext the service context to be applied
+	 */
+	@Override
+	public boolean sendPasswordLockout(
+			long companyId, String emailAddress, String fromName,
+			String fromAddress, String subject, String body,
+			ServiceContext serviceContext)
+		throws PortalException {
+
+		Company company = _companyPersistence.findByPrimaryKey(companyId);
+
+		emailAddress = StringUtil.toLowerCase(StringUtil.trim(emailAddress));
+
+		if (Validator.isNull(emailAddress)) {
+			throw new UserEmailAddressException.MustNotBeNull();
+		}
+
+		User user = userPersistence.findByC_EA(companyId, emailAddress);
+
+		sendPasswordLockoutNotification(
+			user, companyId, fromName, fromAddress, subject, body,
+			serviceContext);
+
+		return false;
 	}
 
 	/**
@@ -6550,9 +6548,8 @@ public class UserLocalServiceImpl extends UserLocalServiceBaseImpl {
 	}
 
 	protected void sendPasswordLockoutNotification(
-		User user, long companyId, String fromName,
-		String fromAddress, String subject, String body,
-		ServiceContext serviceContext) {
+		User user, long companyId, String fromName, String fromAddress,
+		String subject, String body, ServiceContext serviceContext) {
 
 		if (Validator.isNull(fromName)) {
 			fromName = PrefsPropsUtil.getString(
@@ -6619,7 +6616,6 @@ public class UserLocalServiceImpl extends UserLocalServiceBaseImpl {
 			"[$USER_ID$]", String.valueOf(user.getUserId()));
 		mailTemplateContextBuilder.put(
 			"[$USER_SCREENNAME$]", new EscapableObject<>(user.getScreenName()));
-
 
 		MailTemplateContext mailTemplateContext =
 			mailTemplateContextBuilder.build();
@@ -7442,6 +7438,9 @@ public class UserLocalServiceImpl extends UserLocalServiceBaseImpl {
 	@BeanReference(type = ImageLocalService.class)
 	private ImageLocalService _imageLocalService;
 
+	@Reference
+	private Language _language;
+
 	@BeanReference(type = LayoutLocalService.class)
 	private LayoutLocalService _layoutLocalService;
 
@@ -7543,8 +7542,5 @@ public class UserLocalServiceImpl extends UserLocalServiceBaseImpl {
 
 	@BeanReference(type = WorkflowInstanceLinkLocalService.class)
 	private WorkflowInstanceLinkLocalService _workflowInstanceLinkLocalService;
-
-	@Reference
-	private Language _language;
 
 }
