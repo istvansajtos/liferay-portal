@@ -6648,9 +6648,9 @@ public class UserLocalServiceImpl extends UserLocalServiceBaseImpl {
 	}
 
 	protected void sendPasswordLockoutNotification(
-		User user, long companyId, String fromName,
-		String fromAddress, String subject, String body,
-		ServiceContext serviceContext) throws PortalException {
+			User user, long companyId, String fromName, String fromAddress,
+			String subject, String body, ServiceContext serviceContext)
+		throws PortalException {
 
 		PasswordPolicy passwordPolicy = user.getPasswordPolicy();
 
