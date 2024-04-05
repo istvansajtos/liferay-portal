@@ -5,22 +5,37 @@
 
 // @ts-ignore
 
-import {Page} from '@playwright/test';
+import {Locator, Page} from '@playwright/test';
 
 import {clickAndExpectToBeVisible} from '../../../utils/clickAndExpectToBeVisible';
 import {PORTLET_URLS} from '../../../utils/portletUrls';
 
 export class UtilityPagesPage {
+	readonly newButton: Locator;
 	readonly page: Page;
+	readonly signInOption: Locator;
 
 	constructor(page: Page) {
+		this.newButton = page.getByRole('button', { name: 'New' });
 		this.page = page;
+		//await page.getByRole('menuitem', { name: 'Sign In' })
 	}
 
 	async goto(siteUrl?: Site['friendlyUrlPath']) {
 		await this.page.goto(
 			`/group${siteUrl || '/guest'}${PORTLET_URLS.utilityPages}`
 		);
+	}
+
+	async addNewPage(name: string, type: string) {
+		await this.newButton.click();
+
+		await this.page.getByRole('menuitem', { name: type }).click();
+		await this.page.getByRole('button', { name: 'Blank' }).click();
+		await this.page.getByPlaceholder('Name').click();
+		await this.page.getByPlaceholder('Name').fill(name);
+		await this.page.getByRole('button', { name: 'Save' }).click();
+		await this.page.getByRole('button', { name: 'Publish' }).click();
 	}
 
 	async clickOnAction(action: string, title: string) {
