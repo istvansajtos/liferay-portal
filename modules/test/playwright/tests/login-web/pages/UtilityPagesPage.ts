@@ -34,8 +34,16 @@ export class UtilityPagesPage {
 		await this.page.getByRole('button', { name: 'Blank' }).click();
 		await this.page.getByPlaceholder('Name').click();
 		await this.page.getByPlaceholder('Name').fill(name);
-		await this.page.getByRole('button', { name: 'Save' }).click();
-		await this.page.getByRole('button', { name: 'Publish' }).click();
+		
+		//await this.page.getByRole('button', { name: 'Save' }).click();
+
+		await clickAndExpectToBeVisible({
+			autoClick: true,
+			target: this.page.getByRole('button', { name: 'Publish' }),
+			trigger: this.page.getByRole('button', { name: 'Save' }),
+		});
+
+		//await this.page.getByRole('button', { name: 'Publish' }).click();
 	}
 
 	async clickOnAction(action: string, title: string) {

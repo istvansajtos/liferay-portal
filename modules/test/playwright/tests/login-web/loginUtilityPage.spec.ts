@@ -11,7 +11,7 @@ import {UtilityPagesPage} from '../login-web/pages/UtilityPagesPage';
 export const test = mergeTests(
     apiHelpersTest,
     featureFlagsTest({
-		'LPD-6368': true,
+		'LPD-6378': true,
 	}),
     loginTest()
 );
@@ -35,10 +35,19 @@ const addUtilityPage = async (
 };
 
 test('valami', async ({ apiHelpers, page, utilityPagesPage }) => {
-	await page.goto(liferayConfig.environment.baseUrl);
+	//await page.goto(liferayConfig.environment.baseUrl);
+    //await expect(page).toHaveTitle('Home - Liferay DXP');
 
-	await expect(page).toHaveTitle('Home - Liferay DXP');
+    await utilityPagesPage.goto();
+    await expect(page).toHaveTitle('Pages - Liferay DXP');
 
-    UtilityPagesPage
+    await utilityPagesPage.addNewPage('Sign In Utility Page', 'Sign In');
+    await expect(page.getByText('Sign In Utility Page')).toBeVisible();
+
+    await utilityPagesPage.addNewPage('Create Account Utility Page', 'Create Account');
+    await expect(page.getByText('Create Account Utility Page')).toBeVisible();
+
+    await utilityPagesPage.addNewPage('Forgot Password Utility Page', 'Forgot Password');
+    await expect(page.getByText('Forgot Password Utility Page')).toBeVisible();
     //await test.expect(page).toHaveTitle('login-utility-page - Liferay DXP');
 });
