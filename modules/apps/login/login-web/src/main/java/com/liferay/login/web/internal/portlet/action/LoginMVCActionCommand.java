@@ -116,6 +116,9 @@ public class LoginMVCActionCommand extends BaseMVCActionCommand {
 			}
 		}
 		catch (Exception exception) {
+			HttpServletRequest httpServletRequest =
+				_portal.getHttpServletRequest(actionRequest);
+
 			if (exception instanceof AuthException) {
 				Throwable throwable = exception.getCause();
 
@@ -123,14 +126,14 @@ public class LoginMVCActionCommand extends BaseMVCActionCommand {
 					throwable instanceof UserLockoutException) {
 
 					SessionErrors.add(
-						actionRequest, throwable.getClass(), throwable);
+						httpServletRequest, throwable.getClass(), throwable);
 				}
 				else {
 					if (_log.isInfoEnabled()) {
 						_log.info("Authentication failed");
 					}
 
-					SessionErrors.add(actionRequest, exception.getClass());
+					SessionErrors.add(httpServletRequest, exception.getClass());
 				}
 
 				_postProcessAuthFailure(actionRequest, actionResponse);
@@ -163,7 +166,7 @@ public class LoginMVCActionCommand extends BaseMVCActionCommand {
 				}
 
 				SessionErrors.add(
-					actionRequest, exception.getClass(), exception);
+					httpServletRequest, exception.getClass(), exception);
 
 				_postProcessAuthFailure(actionRequest, actionResponse);
 
@@ -183,7 +186,7 @@ public class LoginMVCActionCommand extends BaseMVCActionCommand {
 				exception instanceof UserScreenNameException) {
 
 				SessionErrors.add(
-					actionRequest, exception.getClass(), exception);
+					httpServletRequest, exception.getClass(), exception);
 			}
 			else {
 				_log.error(exception);
@@ -384,7 +387,8 @@ public class LoginMVCActionCommand extends BaseMVCActionCommand {
 		String login = ParamUtil.getString(actionRequest, "login");
 
 		if (Validator.isNotNull(login)) {
-			SessionErrors.add(actionRequest, "login", login);
+			SessionErrors.add(
+				_portal.getHttpServletRequest(actionRequest), "login", login);
 		}
 
 		String portletName = liferayPortletRequest.getPortletName();
