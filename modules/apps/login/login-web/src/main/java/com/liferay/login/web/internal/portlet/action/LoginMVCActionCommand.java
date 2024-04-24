@@ -353,9 +353,14 @@ public class LoginMVCActionCommand extends BaseMVCActionCommand {
 					themeDisplay.getScopeGroupId(),
 					LayoutUtilityPageEntryConstants.TYPE_LOGIN);
 
-		if (layout == null) {
-			layout = (Layout)actionRequest.getAttribute(WebKeys.LAYOUT);
+		if (layout != null) {
+			actionResponse.sendRedirect(
+				_portal.getLayoutURL(layout, themeDisplay));
+
+			return;
 		}
+
+		layout = (Layout)actionRequest.getAttribute(WebKeys.LAYOUT);
 
 		PortletURL portletURL = PortletURLBuilder.create(
 			PortletURLFactoryUtil.create(
