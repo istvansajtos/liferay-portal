@@ -35,6 +35,7 @@ import com.liferay.portal.kernel.portlet.url.builder.PortletURLBuilder;
 import com.liferay.portal.kernel.security.auth.AuthException;
 import com.liferay.portal.kernel.service.UserLocalService;
 import com.liferay.portal.kernel.servlet.SessionErrors;
+import com.liferay.portal.kernel.servlet.SessionMessages;
 import com.liferay.portal.kernel.theme.ThemeDisplay;
 import com.liferay.portal.kernel.util.GetterUtil;
 import com.liferay.portal.kernel.util.Http;
@@ -119,6 +120,11 @@ public class LoginMVCActionCommand extends BaseMVCActionCommand {
 			HttpServletRequest httpServletRequest =
 				_portal.getHttpServletRequest(actionRequest);
 
+			SessionMessages.add(
+				httpServletRequest,
+				_portal.getPortletId(actionRequest) +
+					SessionMessages.KEY_SUFFIX_HIDE_DEFAULT_ERROR_MESSAGE);
+
 			if (exception instanceof AuthException) {
 				Throwable throwable = exception.getCause();
 
@@ -137,8 +143,6 @@ public class LoginMVCActionCommand extends BaseMVCActionCommand {
 				}
 
 				_postProcessAuthFailure(actionRequest, actionResponse);
-
-				hideDefaultErrorMessage(actionRequest);
 
 				return;
 			}
@@ -170,8 +174,6 @@ public class LoginMVCActionCommand extends BaseMVCActionCommand {
 
 				_postProcessAuthFailure(actionRequest, actionResponse);
 
-				hideDefaultErrorMessage(actionRequest);
-
 				return;
 			}
 
@@ -197,8 +199,6 @@ public class LoginMVCActionCommand extends BaseMVCActionCommand {
 			}
 
 			_postProcessAuthFailure(actionRequest, actionResponse);
-
-			hideDefaultErrorMessage(actionRequest);
 		}
 	}
 
