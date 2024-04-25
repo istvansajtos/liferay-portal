@@ -33,8 +33,10 @@ import com.liferay.portal.kernel.portlet.bridges.mvc.BaseMVCActionCommand;
 import com.liferay.portal.kernel.portlet.bridges.mvc.MVCActionCommand;
 import com.liferay.portal.kernel.portlet.url.builder.PortletURLBuilder;
 import com.liferay.portal.kernel.security.auth.AuthException;
+import com.liferay.portal.kernel.service.PortletPreferencesLocalService;
 import com.liferay.portal.kernel.service.UserLocalService;
 import com.liferay.portal.kernel.servlet.SessionErrors;
+import com.liferay.portal.kernel.servlet.SessionMessages;
 import com.liferay.portal.kernel.theme.ThemeDisplay;
 import com.liferay.portal.kernel.util.GetterUtil;
 import com.liferay.portal.kernel.util.Http;
@@ -119,6 +121,8 @@ public class LoginMVCActionCommand extends BaseMVCActionCommand {
 			HttpServletRequest httpServletRequest =
 				_portal.getHttpServletRequest(actionRequest);
 
+			_hideDefaultErrorMessages(actionRequest);
+
 			if (exception instanceof AuthException) {
 				Throwable throwable = exception.getCause();
 
@@ -137,8 +141,6 @@ public class LoginMVCActionCommand extends BaseMVCActionCommand {
 				}
 
 				_postProcessAuthFailure(actionRequest, actionResponse);
-
-				hideDefaultErrorMessage(actionRequest);
 
 				return;
 			}
@@ -170,8 +172,6 @@ public class LoginMVCActionCommand extends BaseMVCActionCommand {
 
 				_postProcessAuthFailure(actionRequest, actionResponse);
 
-				hideDefaultErrorMessage(actionRequest);
-
 				return;
 			}
 
@@ -197,8 +197,6 @@ public class LoginMVCActionCommand extends BaseMVCActionCommand {
 			}
 
 			_postProcessAuthFailure(actionRequest, actionResponse);
-
-			hideDefaultErrorMessage(actionRequest);
 		}
 	}
 
@@ -340,6 +338,37 @@ public class LoginMVCActionCommand extends BaseMVCActionCommand {
 		return user;
 	}
 
+	private void _hideDefaultErrorMessages(PortletRequest portletRequest)
+		throws Exception {
+
+		HttpServletRequest httpServletRequest = _portal.getHttpServletRequest(
+			portletRequest);
+
+		ThemeDisplay themeDisplay = (ThemeDisplay)portletRequest.getAttribute(
+			WebKeys.THEME_DISPLAY);
+
+		Layout layout =
+			_layoutUtilityPageEntryLayoutProvider.
+				getDefaultLayoutUtilityPageEntryLayout(
+					themeDisplay.getScopeGroupId(),
+					LayoutUtilityPageEntryConstants.TYPE_LOGIN);
+
+		if (layout == null) {
+			layout = themeDisplay.getLayout();
+		}
+
+		for (com.liferay.portal.kernel.model.PortletPreferences
+				portletPreferences :
+					_portletPreferencesLocalService.getPortletPreferencesByPlid(
+						layout.getPlid())) {
+
+			SessionMessages.add(
+				httpServletRequest,
+				portletPreferences.getPortletId() +
+					SessionMessages.KEY_SUFFIX_HIDE_DEFAULT_ERROR_MESSAGE);
+		}
+	}
+
 	private void _postProcessAuthFailure(
 			ActionRequest actionRequest, ActionResponse actionResponse)
 		throws Exception {
@@ -412,6 +441,9 @@ public class LoginMVCActionCommand extends BaseMVCActionCommand {
 
 	@Reference
 	private Portal _portal;
+
+	@Reference
+	private PortletPreferencesLocalService _portletPreferencesLocalService;
 
 	@Reference
 	private UserLocalService _userLocalService;
