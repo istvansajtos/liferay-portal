@@ -114,6 +114,16 @@ public class LoginAction implements Action {
 
 		String redirect = null;
 
+		String loginRedirect = ParamUtil.getString(
+			httpServletRequest, "redirect");
+
+		loginRedirect = PortalUtil.escapeRedirect(loginRedirect);
+
+		String loginPortletNamespace = PortalUtil.getPortletNamespace(
+			PropsValues.AUTH_LOGIN_PORTLET_NAME);
+
+		String loginRedirectParameter = loginPortletNamespace + "redirect";
+
 		Layout layout =
 			LayoutUtilityPageEntryLayoutProviderUtil.
 				getDefaultLayoutUtilityPageEntryLayout(
@@ -125,57 +135,52 @@ public class LoginAction implements Action {
 				getWindowState(httpServletRequest),
 				LiferayWindowState.EXCLUSIVE)) {
 
-			redirect = PortalUtil.getLayoutURL(layout, themeDisplay));
+			redirect = PortalUtil.getLayoutURL(layout, themeDisplay);
 
-			return null;
-		}
-		else {
-		redirect = PortalUtil.getSiteLoginURL(themeDisplay);
+			redirect = HttpComponentsUtil.setParameter(
+				redirect, "saveLastPath", false);
 
-		if (Validator.isNull(redirect)) {
-			redirect = PropsValues.AUTH_LOGIN_URL;
-		}
-
-		if (Validator.isNull(redirect)) {
-			redirect = PortletURLBuilder.create(
-				PortletURLFactoryUtil.create(
-					httpServletRequest, PortletKeys.LOGIN,
-					PortletRequest.RENDER_PHASE)
-			).setMVCRenderCommandName(
-				"/login/login"
-			).setParameter(
-				"saveLastPath", false
-			).setPortletMode(
-				PortletMode.VIEW
-			).setWindowState(
-				getWindowState(httpServletRequest)
-			).buildString();
-		}
-
-		String loginRedirect = ParamUtil.getString(
-			httpServletRequest, "redirect");
-
-		loginRedirect = PortalUtil.escapeRedirect(loginRedirect);
-
-		if (Validator.isNotNull(loginRedirect)) {
-			if (SSOUtil.isRedirectRequired(themeDisplay.getCompanyId())) {
-				redirect = loginRedirect;
-			}
-			else {
-				String loginPortletNamespace = PortalUtil.getPortletNamespace(
-					PropsValues.AUTH_LOGIN_PORTLET_NAME);
-
-				String loginRedirectParameter =
-					loginPortletNamespace + "redirect";
-
-				redirect = HttpComponentsUtil.setParameter(
-					redirect, "p_p_id", PropsValues.AUTH_LOGIN_PORTLET_NAME);
-				redirect = HttpComponentsUtil.setParameter(
-					redirect, "p_p_lifecycle", "0");
+			if (Validator.isNotNull(loginRedirect)) {
 				redirect = HttpComponentsUtil.setParameter(
 					redirect, loginRedirectParameter, loginRedirect);
 			}
 		}
+		else {
+			redirect = PortalUtil.getSiteLoginURL(themeDisplay);
+
+			if (Validator.isNull(redirect)) {
+				redirect = PropsValues.AUTH_LOGIN_URL;
+			}
+
+			if (Validator.isNull(redirect)) {
+				redirect = PortletURLBuilder.create(
+					PortletURLFactoryUtil.create(
+						httpServletRequest, PortletKeys.LOGIN,
+						PortletRequest.RENDER_PHASE)
+				).setMVCRenderCommandName(
+					"/login/login"
+				).setParameter(
+					"saveLastPath", false
+				).setPortletMode(
+					PortletMode.VIEW
+				).setWindowState(
+					getWindowState(httpServletRequest)
+				).buildString();
+			}
+
+			if (Validator.isNotNull(loginRedirect)) {
+				if (SSOUtil.isRedirectRequired(themeDisplay.getCompanyId())) {
+					redirect = loginRedirect;
+				}
+				else {
+					redirect = HttpComponentsUtil.setParameter(
+						redirect, "p_p_id", PropsValues.AUTH_LOGIN_PORTLET_NAME);
+					redirect = HttpComponentsUtil.setParameter(
+						redirect, "p_p_lifecycle", "0");
+					redirect = HttpComponentsUtil.setParameter(
+						redirect, loginRedirectParameter, loginRedirect);
+				}
+			}
 		}
 
 		httpServletResponse.sendRedirect(redirect);
