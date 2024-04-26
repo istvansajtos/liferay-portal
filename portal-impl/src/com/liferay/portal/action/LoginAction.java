@@ -112,6 +112,8 @@ public class LoginAction implements Action {
 			return null;
 		}
 
+		String redirect = null;
+
 		Layout layout =
 			LayoutUtilityPageEntryLayoutProviderUtil.
 				getDefaultLayoutUtilityPageEntryLayout(
@@ -123,13 +125,12 @@ public class LoginAction implements Action {
 				getWindowState(httpServletRequest),
 				LiferayWindowState.EXCLUSIVE)) {
 
-			httpServletResponse.sendRedirect(
-				PortalUtil.getLayoutURL(layout, themeDisplay));
+			redirect = PortalUtil.getLayoutURL(layout, themeDisplay));
 
 			return null;
 		}
-
-		String redirect = PortalUtil.getSiteLoginURL(themeDisplay);
+		else {
+		redirect = PortalUtil.getSiteLoginURL(themeDisplay);
 
 		if (Validator.isNull(redirect)) {
 			redirect = PropsValues.AUTH_LOGIN_URL;
@@ -174,6 +175,7 @@ public class LoginAction implements Action {
 				redirect = HttpComponentsUtil.setParameter(
 					redirect, loginRedirectParameter, loginRedirect);
 			}
+		}
 		}
 
 		httpServletResponse.sendRedirect(redirect);
