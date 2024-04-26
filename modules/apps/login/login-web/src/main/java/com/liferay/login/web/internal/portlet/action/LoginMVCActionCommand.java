@@ -357,8 +357,23 @@ public class LoginMVCActionCommand extends BaseMVCActionCommand {
 					LayoutUtilityPageEntryConstants.TYPE_LOGIN);
 
 		if (layout != null) {
-			actionResponse.sendRedirect(
-				_portal.getLayoutURL(layout, themeDisplay));
+			//String redirect = _portal.getLayoutURL(layout, themeDisplay);
+			String redirect = themeDisplay.getURLSignIn();
+
+			String loginRedirect = ParamUtil.getString(actionRequest, "redirect");
+
+			if (Validator.isNotNull(loginRedirect)) {
+				redirect = HttpComponentsUtil.setParameter(
+					redirect, "_com_liferay_login_web_portlet_LoginPortlet_redirect", loginRedirect);
+				redirect = HttpComponentsUtil.setParameter(
+					redirect, "redirect", loginRedirect);
+			}
+			redirect = HttpComponentsUtil.setParameter(
+				redirect, "saveLastPath", false);
+			//url = url.concat("?redirect=" + (Validator.isNotNull(redirect) ? redirect : null));
+			//url = url.concat("&saveLastPath=false");
+
+			actionResponse.sendRedirect(redirect);
 
 			return;
 		}

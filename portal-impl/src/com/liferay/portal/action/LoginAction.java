@@ -143,6 +143,8 @@ public class LoginAction implements Action {
 			if (Validator.isNotNull(loginRedirect)) {
 				redirect = HttpComponentsUtil.setParameter(
 					redirect, loginRedirectParameter, loginRedirect);
+				redirect = HttpComponentsUtil.setParameter(
+					redirect, "redirect", loginRedirect);
 			}
 		}
 		else {
