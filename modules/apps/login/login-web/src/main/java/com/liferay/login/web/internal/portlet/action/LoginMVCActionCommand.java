@@ -367,6 +367,11 @@ public class LoginMVCActionCommand extends BaseMVCActionCommand {
 				portletPreferences.getPortletId() +
 					SessionMessages.KEY_SUFFIX_HIDE_DEFAULT_ERROR_MESSAGE);
 		}
+
+		SessionMessages.add(
+			httpServletRequest,
+			LoginPortletKeys.LOGIN +
+				SessionMessages.KEY_SUFFIX_HIDE_DEFAULT_ERROR_MESSAGE);
 	}
 
 	private void _postProcessAuthFailure(
