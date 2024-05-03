@@ -233,10 +233,9 @@ public class FacebookConnectImpl implements FacebookConnect {
 		long companyId) {
 
 		try {
-			return _configurationProvider.getConfiguration(
+			return _configurationProvider.getCompanyConfiguration(
 				FacebookConnectConfiguration.class,
-				new CompanyServiceSettingsLocator(
-					companyId, FacebookConnectConstants.SERVICE_NAME));
+				companyId);
 		}
 		catch (ConfigurationException configurationException) {
 			_log.error(
