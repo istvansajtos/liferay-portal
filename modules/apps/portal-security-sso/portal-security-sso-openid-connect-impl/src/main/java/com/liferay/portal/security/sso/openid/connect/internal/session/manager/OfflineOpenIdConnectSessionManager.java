@@ -32,7 +32,9 @@ import com.liferay.portal.kernel.util.Validator;
 import com.liferay.portal.security.sso.openid.connect.configuration.OpenIdConnectConfiguration;
 import com.liferay.portal.security.sso.openid.connect.constants.OpenIdConnectWebKeys;
 import com.liferay.portal.security.sso.openid.connect.internal.AuthorizationServerMetadataResolver;
+import com.liferay.portal.security.sso.openid.connect.internal.configuration.OpenIdConnectProviderConfiguration;
 import com.liferay.portal.security.sso.openid.connect.internal.constants.OpenIdConnectDestinationNames;
+import com.liferay.portal.security.sso.openid.connect.internal.util.OpenIdConnectProviderUtil;
 import com.liferay.portal.security.sso.openid.connect.internal.util.OpenIdConnectTokenRequestUtil;
 import com.liferay.portal.security.sso.openid.connect.persistence.model.OpenIdConnectSession;
 import com.liferay.portal.security.sso.openid.connect.persistence.service.OpenIdConnectSessionLocalService;
@@ -232,12 +234,26 @@ public class OfflineOpenIdConnectSessionManager {
 		}
 
 		try {
+			OpenIdConnectProviderConfiguration
+				openIdConnectProviderConfiguration =
+					OpenIdConnectProviderUtil.
+						getOpenIdConnectProviderConfiguration(
+							oAuthClientEntry.getClientId());
+
+			long discoveryEndPointCacheInMillis =
+				openIdConnectProviderConfiguration.
+					discoveryEndPointCacheInMillis();
+
+			int discoveryEndPointCacheInSecs =
+				(int)(discoveryEndPointCacheInMillis / 1000);
+
 			OIDCTokens oidcTokens = OpenIdConnectTokenRequestUtil.request(
 				OIDCClientInformation.parse(
 					JSONObjectUtils.parse(oAuthClientEntry.getInfoJSON())),
 				_authorizationServerMetadataResolver.
 					resolveOIDCProviderMetadata(
-						openIdConnectSession.getAuthServerWellKnownURI()),
+						openIdConnectSession.getAuthServerWellKnownURI(),
+						discoveryEndPointCacheInSecs),
 				refreshToken, oAuthClientEntry.getTokenRequestParametersJSON());
 
 			_updateOpenIdConnectSession(

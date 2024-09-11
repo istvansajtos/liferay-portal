@@ -23,6 +23,7 @@ import com.liferay.portal.security.sso.openid.connect.OpenIdConnectAuthenticatio
 import com.liferay.portal.security.sso.openid.connect.OpenIdConnectServiceException;
 import com.liferay.portal.security.sso.openid.connect.constants.OpenIdConnectConstants;
 import com.liferay.portal.security.sso.openid.connect.constants.OpenIdConnectWebKeys;
+import com.liferay.portal.security.sso.openid.connect.internal.configuration.OpenIdConnectProviderConfiguration;
 import com.liferay.portal.security.sso.openid.connect.internal.session.manager.OfflineOpenIdConnectSessionManager;
 import com.liferay.portal.security.sso.openid.connect.internal.util.OpenIdConnectProviderUtil;
 import com.liferay.portal.security.sso.openid.connect.internal.util.OpenIdConnectRequestParametersUtil;
@@ -127,9 +128,20 @@ public class OpenIdConnectAuthenticationHandlerImpl
 			OIDCClientInformation.parse(
 				JSONObjectUtils.parse(oAuthClientEntry.getInfoJSON()));
 
+		OpenIdConnectProviderConfiguration openIdConnectProviderConfiguration =
+			OpenIdConnectProviderUtil.getOpenIdConnectProviderConfiguration(
+				oAuthClientEntry.getClientId());
+
+		long discoveryEndPointCacheInMillis =
+			openIdConnectProviderConfiguration.discoveryEndPointCacheInMillis();
+
+		int discoveryEndPointCacheInSecs =
+			(int)(discoveryEndPointCacheInMillis / 1000);
+
 		OIDCProviderMetadata oidcProviderMetadata =
 			_authorizationServerMetadataResolver.resolveOIDCProviderMetadata(
-				oAuthClientEntry.getAuthServerWellKnownURI());
+				oAuthClientEntry.getAuthServerWellKnownURI(),
+				discoveryEndPointCacheInSecs);
 
 		OIDCTokens oidcTokens = OpenIdConnectTokenRequestUtil.request(
 			authenticationSuccessResponse,
@@ -216,10 +228,24 @@ public class OpenIdConnectAuthenticationHandlerImpl
 			).build();
 
 		try {
+			OpenIdConnectProviderConfiguration
+				openIdConnectProviderConfiguration =
+					OpenIdConnectProviderUtil.
+						getOpenIdConnectProviderConfiguration(
+							oAuthClientEntry.getClientId());
+
+			long discoveryEndPointCacheInMillis =
+				openIdConnectProviderConfiguration.
+					discoveryEndPointCacheInMillis();
+
+			int discoveryEndPointCacheInSecs =
+				(int)(discoveryEndPointCacheInMillis / 1000);
+
 			OIDCProviderMetadata oidcProviderMetadata =
 				_authorizationServerMetadataResolver.
 					resolveOIDCProviderMetadata(
-						oAuthClientEntry.getAuthServerWellKnownURI());
+						oAuthClientEntry.getAuthServerWellKnownURI(),
+						discoveryEndPointCacheInSecs);
 
 			URI authenticationRequestURI = _getAuthenticationRequestURI(
 				oidcProviderMetadata.getAuthorizationEndpointURI(),
