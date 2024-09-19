@@ -109,6 +109,7 @@ public class OpenIdConnectProviderPortalInstanceLifecycleListener
 			guestUserId, _generateAuthRequestParametersJSON(properties),
 			_updateOAuthClientASLocalMetadata(guestUserId, properties),
 			_generateInfoJSON(properties),
+			(Long)properties.get("metadataCacheInMillis"),
 			OAuthClientEntryConstants.OIDC_USER_INFO_MAPPER_JSON,
 			_generateTokenRequestParametersJSON(properties));
 	}
@@ -441,6 +442,7 @@ public class OpenIdConnectProviderPortalInstanceLifecycleListener
 						_updateOAuthClientASLocalMetadata(
 							guestUserId, properties),
 						_generateInfoJSON(properties),
+						(Long)properties.get("metadataCacheInMillis"),
 						oldOAuthClientEntry.getOIDCUserInfoMapperJSON(),
 						_generateTokenRequestParametersJSON(properties));
 				}
