@@ -895,6 +895,10 @@ public class PortalImpl implements Portal {
 			return url;
 		}
 
+		if (StringUtil.equalsIgnoreCase(uri.getScheme(), "javascript")) {
+			return null;
+		}
+
 		String domain = uri.getHost();
 
 		if (Validator.isNull(domain)) {
