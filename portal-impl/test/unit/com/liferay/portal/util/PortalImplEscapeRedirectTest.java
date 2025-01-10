@@ -349,6 +349,11 @@ public class PortalImplEscapeRedirectTest {
 			_portalImpl.escapeRedirect("http://prefixtest.liferay.com"));
 	}
 
+	@Test
+	public void testEscapeRedirectWithUnsupportedURIScheme() throws Exception {
+		Assert.assertNull(_portalImpl.escapeRedirect("javascript://localhost"));
+	}
+
 	private static final String _HOSTNAME_PORTAL_DOMAIN =
 		RandomTestUtil.randomString();
 
