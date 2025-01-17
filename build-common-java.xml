@@ -222,6 +222,15 @@
 							<attribute name="Bundle-Name" value="${manifest.bundle.name}" />
 							<attribute name="Bundle-SymbolicName" value="${manifest.bundle.symbolic.name}" />
 						</manifest>
+
+						<if>
+							<equals arg1="${manifest.bundle.name}" arg2="Liferay Portal Impl" />
+							<then>
+								<manifest file="classes/META-INF/MANIFEST.MF" mode="update">
+									<attribute name="CPE-Identifier" value="${release.info.cpe.id}" />
+								</manifest>
+							</then>
+						</if>
 					</then>
 				</if>
 
