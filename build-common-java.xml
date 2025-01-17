@@ -196,6 +196,7 @@
 					<attribute name="Bundle-RequiredExecutionEnvironment" value="J2SE-1.5" />
 					<attribute name="Bundle-Vendor" value="${release.info.vendor}" />
 					<attribute name="Bundle-Version" value="${artifact.version}" />
+					<attribute name="CPE-Identifier" value="${release.info.cpe.id}" />
 					<attribute name="Javac-Compiler" value="${javac.compiler}" />
 					<attribute name="Javac-Debug" value="${javac.debug}" />
 					<attribute name="Javac-Deprecation" value="${javac.deprecation}" />
