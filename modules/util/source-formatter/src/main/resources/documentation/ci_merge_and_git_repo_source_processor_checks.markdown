@@ -1,4 +1,4 @@
-# Checks for .gitrepo or ci-merge
+# Checks for 
 
 Check | Category | Description
 ----- | -------- | -----------
