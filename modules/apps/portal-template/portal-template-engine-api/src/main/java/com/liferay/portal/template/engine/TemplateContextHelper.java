@@ -924,12 +924,7 @@ public class TemplateContextHelper {
 						"local network."));
 			}
 
-			Options options = new Options();
-
-			options.setFollowRedirects(false);
-			options.setLocation(location);
-
-			return _http.URLtoByteArray(options);
+			return _http.URLtoByteArray(_getOptions(location, false));
 		}
 
 		@Override
@@ -945,13 +940,7 @@ public class TemplateContextHelper {
 						"local network."));
 			}
 
-			Options options = new Options();
-
-			options.setFollowRedirects(false);
-			options.setLocation(location);
-			options.setPost(post);
-
-			return _http.URLtoByteArray(options);
+			return _http.URLtoByteArray(_getOptions(location, post));
 		}
 
 		@Override
@@ -985,12 +974,7 @@ public class TemplateContextHelper {
 						"local network."));
 			}
 
-			Options options = new Options();
-
-			options.setFollowRedirects(false);
-			options.setLocation(location);
-
-			return _http.URLtoInputStream(options);
+			return _http.URLtoInputStream(_getOptions(location, false));
 		}
 
 		@Override
@@ -1006,13 +990,7 @@ public class TemplateContextHelper {
 						"local network."));
 			}
 
-			Options options = new Options();
-
-			options.setFollowRedirects(false);
-			options.setLocation(location);
-			options.setPost(post);
-
-			return _http.URLtoInputStream(options);
+			return _http.URLtoInputStream(_getOptions(location, post));
 		}
 
 		@Override
@@ -1042,12 +1020,7 @@ public class TemplateContextHelper {
 						"local network."));
 			}
 
-			Options options = new Options();
-
-			options.setFollowRedirects(false);
-			options.setLocation(location);
-
-			return _http.URLtoString(options);
+			return _http.URLtoString(_getOptions(location, false));
 		}
 
 		@Override
@@ -1063,13 +1036,7 @@ public class TemplateContextHelper {
 						"local network."));
 			}
 
-			Options options = new Options();
-
-			options.setFollowRedirects(false);
-			options.setLocation(location);
-			options.setPost(post);
-
-			return _http.URLtoString(options);
+			return _http.URLtoString(_getOptions(location, post));
 		}
 
 		@Override
@@ -1093,12 +1060,7 @@ public class TemplateContextHelper {
 						"local network."));
 			}
 
-			Options options = new Options();
-
-			options.setFollowRedirects(false);
-			options.setLocation(url.toString());
-
-			return _http.URLtoString(options);
+			return _http.URLtoString(_getOptions(url.toString(), false));
 		}
 
 		protected boolean isLocationAccessDenied(String location)
@@ -1115,6 +1077,16 @@ public class TemplateContextHelper {
 			}
 
 			return false;
+		}
+
+		private Options _getOptions(String location, boolean post) {
+			Options options = new Options();
+
+			options.setFollowRedirects(false);
+			options.setLocation(location);
+			options.setPost(post);
+
+			return options;
 		}
 
 		private final boolean _disableLocalNetworkAccess;
