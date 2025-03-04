@@ -915,30 +915,12 @@ public class TemplateContextHelper {
 
 		@Override
 		public byte[] URLtoByteArray(String location) throws IOException {
-			if (isLocationAccessDenied(location)) {
-				throw new IOException(
-					StringBundler.concat(
-						"Denied access to resource ", location,
-						" using $httpUtil variable from a template. Please ",
-						"use restricted variable $httpUtilUnsafe to access ",
-						"local network."));
-			}
-
 			return _http.URLtoByteArray(_getOptions(location, false));
 		}
 
 		@Override
 		public byte[] URLtoByteArray(String location, boolean post)
 			throws IOException {
-
-			if (isLocationAccessDenied(location)) {
-				throw new IOException(
-					StringBundler.concat(
-						"Denied access to resource ", location,
-						" using $httpUtil variable from a template. Please ",
-						"use restricted variable $httpUtilUnsafe to access ",
-						"local network."));
-			}
 
 			return _http.URLtoByteArray(_getOptions(location, post));
 		}
@@ -965,30 +947,12 @@ public class TemplateContextHelper {
 		public InputStream URLtoInputStream(String location)
 			throws IOException {
 
-			if (isLocationAccessDenied(location)) {
-				throw new IOException(
-					StringBundler.concat(
-						"Denied access to resource ", location,
-						" using $httpUtil variable from a template. Please ",
-						"use restricted variable $httpUtilUnsafe to access ",
-						"local network."));
-			}
-
 			return _http.URLtoInputStream(_getOptions(location, false));
 		}
 
 		@Override
 		public InputStream URLtoInputStream(String location, boolean post)
 			throws IOException {
-
-			if (isLocationAccessDenied(location)) {
-				throw new IOException(
-					StringBundler.concat(
-						"Denied access to resource ", location,
-						" using $httpUtil variable from a template. Please ",
-						"use restricted variable $httpUtilUnsafe to access ",
-						"local network."));
-			}
 
 			return _http.URLtoInputStream(_getOptions(location, post));
 		}
@@ -1011,30 +975,12 @@ public class TemplateContextHelper {
 
 		@Override
 		public String URLtoString(String location) throws IOException {
-			if (isLocationAccessDenied(location)) {
-				throw new IOException(
-					StringBundler.concat(
-						"Denied access to resource ", location,
-						" using $httpUtil variable from a template. Please ",
-						"use restricted variable $httpUtilUnsafe to access ",
-						"local network."));
-			}
-
 			return _http.URLtoString(_getOptions(location, false));
 		}
 
 		@Override
 		public String URLtoString(String location, boolean post)
 			throws IOException {
-
-			if (isLocationAccessDenied(location)) {
-				throw new IOException(
-					StringBundler.concat(
-						"Denied access to resource ", location,
-						" using $httpUtil variable from a template. Please ",
-						"use restricted variable $httpUtilUnsafe to access ",
-						"local network."));
-			}
 
 			return _http.URLtoString(_getOptions(location, post));
 		}
@@ -1049,15 +995,6 @@ public class TemplateContextHelper {
 						"Denied access to resource ", url,
 						". $httpUtil template variable supports only HTTP and ",
 						"HTTPS protocols."));
-			}
-
-			if (isLocationAccessDenied(url.toString())) {
-				throw new IOException(
-					StringBundler.concat(
-						"Denied access to resource ", url,
-						" using $httpUtil variable from a template. Please ",
-						"use restricted variable $httpUtilUnsafe to access ",
-						"local network."));
 			}
 
 			return _http.URLtoString(_getOptions(url.toString(), false));
