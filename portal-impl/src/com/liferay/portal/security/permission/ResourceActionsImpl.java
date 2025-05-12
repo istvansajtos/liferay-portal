@@ -895,12 +895,20 @@ public class ResourceActionsImpl implements ResourceActions {
 			Set<String> groupDefaultActions =
 				portletResourceActionsBag.getGroupDefaultActions();
 
-			groupDefaultActions.add(ActionKeys.VIEW);
+			if (!portlet.getCategoryNames().contains("category.hidden") &&
+				!portlet.isSystem()) {
+
+				groupDefaultActions.add(ActionKeys.VIEW);
+			}
 
 			Set<String> guestDefaultActions =
 				portletResourceActionsBag.getGuestDefaultActions();
 
-			guestDefaultActions.add(ActionKeys.VIEW);
+			if (!portlet.getCategoryNames().contains("category.hidden") &&
+				!portlet.isSystem()) {
+
+				guestDefaultActions.add(ActionKeys.VIEW);
+			}
 
 			_checkPortletGuestUnsupportedActions(
 				portletResourceActionsBag.getGuestUnsupportedActions());
