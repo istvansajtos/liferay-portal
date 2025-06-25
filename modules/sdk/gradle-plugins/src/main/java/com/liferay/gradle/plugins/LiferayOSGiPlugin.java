@@ -338,6 +338,7 @@ public class LiferayOSGiPlugin implements Plugin<Project> {
 
 				@Override
 				public void execute(Project project) {
+					System.out.println("LiferayOSGiPlugin.apply() -> project.afterEvaluate");
 					_configureExtensionBundleAfterEvaluate(
 						bundleExtension, liferayOSGiExtension,
 						compileIncludeConfiguration);
@@ -345,9 +346,16 @@ public class LiferayOSGiPlugin implements Plugin<Project> {
 						project, compileTestJavaTaskProvider);
 					_configureTaskDeployDependenciesProviderAfterEvaluate(
 						deployDependenciesTaskProvider);
-				}
 
+					for(String key : bundleExtension.keySet()) {
+						System.out.println(">>> LiferayOSGiPlugin.apply - project.afterEvaluate" + key + " : " + bundleExtension.get(key));
+					}
+				}
 			});
+
+		for(String key : bundleExtension.keySet()) {
+			System.out.println(">>> LiferayOSGiPlugin.apply - " + key + " : " + bundleExtension.get(key));
+		}
 	}
 
 	private void _applyPlugins(Project project) {
@@ -460,6 +468,8 @@ public class LiferayOSGiPlugin implements Plugin<Project> {
 		File file = project.file("bnd.bnd");
 
 		if (!file.exists()) {
+			System.out.println(">>> LiferayOSGiPlugin._configureExtensionBundle - NO bnd.bnd file exists!");
+
 			return;
 		}
 
@@ -476,6 +486,10 @@ public class LiferayOSGiPlugin implements Plugin<Project> {
 				String value = utf8Properties.getProperty(key);
 
 				bundleExtension.put(key, value);
+			}
+
+			for(String key : bundleExtension.keySet()) {
+				System.out.println(">>> LiferayOSGiPlugin._configureExtensionBundle - " + key + " : " + bundleExtension.get(key));
 			}
 		}
 		catch (Exception exception) {
@@ -526,6 +540,8 @@ public class LiferayOSGiPlugin implements Plugin<Project> {
 				bundleExtension.instruction(key, entry.getValue());
 			}
 		}
+
+		bundleExtension.instruction("ASDF", "JKLÉ");
 	}
 
 	private void _configureExtensionLiferay(

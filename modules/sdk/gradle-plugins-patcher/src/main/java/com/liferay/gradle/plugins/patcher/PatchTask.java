@@ -263,6 +263,7 @@ public class PatchTask extends DefaultTask {
 
 	@TaskAction
 	public void patch() throws Exception {
+		System.out.println(">>> PatchTask.patch");
 		Project project = getProject();
 
 		File patchesTemporaryDir = fixPatchFiles();

@@ -19,6 +19,7 @@ import org.gradle.api.Action;
 import org.gradle.api.Plugin;
 import org.gradle.api.Project;
 import org.gradle.api.Task;
+import org.gradle.api.file.CopySpec;
 import org.gradle.api.file.DirectoryProperty;
 import org.gradle.api.file.FileCollection;
 import org.gradle.api.file.FileCopyDetails;
@@ -40,7 +41,11 @@ public class PatcherPlugin implements Plugin<Project> {
 
 	@Override
 	public void apply(Project project) {
+		System.out.println(">>> applied PatcherPlugin");
+
 		GradleUtil.applyPlugin(project, JavaLibraryPlugin.class);
+
+		GradleUtil.applyPlugin(project, ThirdPartyBndPlugin.class);
 
 		SourceSet sourceSet = GradleUtil.getSourceSet(
 			project, SourceSet.MAIN_SOURCE_SET_NAME);
@@ -95,6 +100,8 @@ public class PatcherPlugin implements Plugin<Project> {
 			"copy" + StringUtil.capitalize(patchTask.getName()) +
 				"OriginalLibClasses";
 
+		System.out.println(">>> installed copyPatchedOriginalLibClasses");
+
 		final Copy copy = GradleUtil.addTask(
 			patchTask.getProject(), taskName, Copy.class);
 
@@ -106,7 +113,12 @@ public class PatcherPlugin implements Plugin<Project> {
 					File file = new File(
 						copy.getDestinationDir(), fileCopyDetails.getPath());
 
+					String name = file.getName();
+
 					if (file.exists()) {
+					//if (file.exists() || (name.equals("pom.xml") || 
+					//	name.equals("pom.properties"))) {
+					//
 						fileCopyDetails.exclude();
 					}
 				}
@@ -123,6 +135,13 @@ public class PatcherPlugin implements Plugin<Project> {
 					return project.zipTree(patchTask.getOriginalLibFile());
 				}
 
+			},
+			new Action<CopySpec>() {
+
+				@Override
+				public void execute(CopySpec copySpec) {
+					copySpec.exclude("META-INF/MANIFEST.MF");
+				}
 			});
 
 		copy.into(
