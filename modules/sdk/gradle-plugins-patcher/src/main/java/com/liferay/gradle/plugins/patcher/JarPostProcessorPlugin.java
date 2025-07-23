@@ -298,6 +298,7 @@ public class JarPostProcessorPlugin implements Plugin<Project> {
 									"<artifactId>" + artifactId + "</artifactId>");
 							xml = xml.replaceAll("<version>.*?</version>", "<version>" + version + "</version>");
 							newContent = xml.getBytes(StandardCharsets.UTF_8);*/
+							newContent = new byte[5];
 						} else if (name.endsWith("pom.properties")) {
 							Properties props = new Properties();
 
