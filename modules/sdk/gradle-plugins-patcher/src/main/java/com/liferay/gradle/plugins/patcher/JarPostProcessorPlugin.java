@@ -86,7 +86,7 @@ public class JarPostProcessorPlugin implements Plugin<Project> {
 							}
 							else {
 								jarOutputStream = new JarOutputStream(
-									new FileOutputStream(tempFile);
+									new FileOutputStream(tempFile));
 							}
 
 							while ((entry = jarInputStream.getNextJarEntry()) !=
