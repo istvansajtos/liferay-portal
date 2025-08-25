@@ -1,3 +1,8 @@
+/**
+ * SPDX-FileCopyrightText: (c) 2025 Liferay, Inc. https://liferay.com
+ * SPDX-License-Identifier: LGPL-2.1-or-later OR LicenseRef-Liferay-DXP-EULA-2.0.0-2023-06
+ */
+
 package com.liferay.gradle.plugins.patcher;
 
 import aQute.bnd.osgi.Constants;
@@ -5,19 +10,33 @@ import aQute.bnd.osgi.Constants;
 import com.liferay.gradle.plugins.extensions.BundleExtension;
 import com.liferay.gradle.plugins.util.BndUtil;
 
-import java.io.*;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
 
 import java.nio.charset.StandardCharsets;
-import java.nio.file.*;
+import java.nio.file.Files;
+import java.nio.file.StandardCopyOption;
 
 import java.util.Properties;
-import java.util.jar.*;
+import java.util.jar.Attributes;
+import java.util.jar.JarEntry;
+import java.util.jar.JarInputStream;
+import java.util.jar.JarOutputStream;
+import java.util.jar.Manifest;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import org.gradle.api.Plugin;
 import org.gradle.api.Project;
 import org.gradle.api.tasks.TaskContainer;
 import org.gradle.api.tasks.bundling.Jar;
 
+/**
+ * @author Istvan Sajtos
+ */
 public class JarPostProcessorPlugin implements Plugin<Project> {
 
 	@Override
@@ -26,9 +45,9 @@ public class JarPostProcessorPlugin implements Plugin<Project> {
 
 		project.afterEvaluate(
 			p -> {
-				TaskContainer taskContainer = (Jar)p.getTasks();
+				TaskContainer taskContainer = p.getTasks();
 
-				Jar jarTask = taskContainer.findByName("jar");
+				Jar jarTask = (Jar)taskContainer.findByName("jar");
 
 				jarTask.doLast(
 					task -> {
@@ -48,7 +67,8 @@ public class JarPostProcessorPlugin implements Plugin<Project> {
 
 							String groupId = String.valueOf(project.getGroup());
 
-							String version = String.valueOf(project.getVersion());
+							String version = String.valueOf(
+								project.getVersion());
 
 							System.out.println(
 								">>> JarPostProcessorPlugin - groupId " +
@@ -68,8 +88,7 @@ public class JarPostProcessorPlugin implements Plugin<Project> {
 							JarOutputStream jarOutputStream = null;
 
 							File tempFile = new File(
-								file.getParentFile(), 
-								file.getName() + ".tmp");
+								file.getParentFile(), file.getName() + ".tmp");
 
 							if (manifest != null) {
 								Attributes attributes =
@@ -79,28 +98,29 @@ public class JarPostProcessorPlugin implements Plugin<Project> {
 									"Bundle-SymbolicName", artifactId);
 								attributes.putValue("Bundle-Version", version);
 
-								jarOutputStream =
-									new JarOutputStream(
-										new FileOutputStream(tempFile),
-										manifest);
+								jarOutputStream = new JarOutputStream(
+									new FileOutputStream(tempFile), manifest);
 							}
 							else {
 								jarOutputStream = new JarOutputStream(
 									new FileOutputStream(tempFile));
 							}
 
-							while ((entry = jarInputStream.getNextJarEntry()) !=
-										null) {
+							JarEntry jarEntry = null;
 
-								String filename = entry.getName();
+							while ((jarEntry =
+										jarInputStream.getNextJarEntry()) !=
+											null) {
 
-								filename = filename.toLowerCase();
+								String fileName = jarEntry.getName();
 
-								if (filename.endsWith("manifest.mf")) {
+								fileName = fileName.toLowerCase();
+
+								if (fileName.endsWith("manifest.mf")) {
 									continue;
 								}
 
-								ByteArrayOutputStream entryContent =
+								ByteArrayOutputStream byteArrayOutputStream =
 									new ByteArrayOutputStream();
 
 								byte[] buffer = new byte[4096];
@@ -110,25 +130,19 @@ public class JarPostProcessorPlugin implements Plugin<Project> {
 								while ((bytesRead = jarInputStream.read(
 											buffer)) != -1) {
 
-									entryContent.write(buffer, 0, bytesRead);
+									byteArrayOutputStream.write(
+										buffer, 0, bytesRead);
 								}
 
-								byte[] newContent;
+								byte[] newContent = null;
 
-								if (filename.endsWith("pom.xml")) {
+								if (fileName.endsWith("pom.xml")) {
 									String xml = new String(
-										entryContent.toByteArray(),
+										byteArrayOutputStream.toByteArray(),
 										StandardCharsets.UTF_8);
 
-									Pattern artifactIdPattern = Pattern.compile(
-										"(?m)^([ \t]*)<artifactId>(.*?)</artifactId>");
-									Pattern groupIdPattern = Pattern.compile(
-										"(?m)^([ \t]*)<groupId>(.*?)</groupId>");
-									Pattern versionPattern = Pattern.compile(
-										"(?m)^([ \t]*)<version>(.*?)</version>");
-
 									Matcher artifactIdMatcher =
-										artifactIdPattern.matcher(xml);
+										_artifactIdPattern.matcher(xml);
 
 									if (!artifactIdMatcher.find()) {
 										throw new IllegalStateException(
@@ -140,8 +154,8 @@ public class JarPostProcessorPlugin implements Plugin<Project> {
 									String indent = artifactIdMatcher.group(1);
 
 									String artifactIdTag =
-										indent + "<artifactId>" +
-											newArtifactId + "</artifactId>";
+										indent + "<artifactId>" + artifactId +
+											"</artifactId>";
 
 									xml = artifactIdMatcher.replaceFirst(
 										Matcher.quoteReplacement(
@@ -150,64 +164,68 @@ public class JarPostProcessorPlugin implements Plugin<Project> {
 									// Insert or update groupId
 
 									Matcher groupIdMatcher =
-										groupIdPattern.matcher(xml);
+										_groupIdPattern.matcher(xml);
 
 									if (groupIdMatcher.find()) {
 										xml = groupIdMatcher.replaceFirst(
-											indent + "<groupId>" + newGroupId +
+											indent + "<groupId>" + groupId +
 												"</groupId>");
 									}
 									else {
-										//xml = insertAfterTag(xml, "artifactId", "groupId", newGroupId, indent);
-										int insertPos = artifactIdMatcher.end();
-										String line =
-											"\n" + indent + "<" + newTag + ">" +
-												newValue + "</" + newTag + ">";
-
-										return xml.substring(0, insertPos) +
-											line + xml.substring(insertPos);
+										xml = _insertTag(
+											xml, "artifactId", "groupId",
+											groupId, indent);
 									}
 
 									// Insert or update version
 
 									Matcher versionMatcher =
-										versionPattern.matcher(xml);
+										_versionPattern.matcher(xml);
 
 									if (versionMatcher.find()) {
 										xml = versionMatcher.replaceFirst(
-											indent + "<version>" + newVersion +
+											indent + "<version>" + version +
 												"</version>");
 									}
 									else {
-										xml = insertAfterTag(
-											xml, "groupId", "version",
-											newVersion, indent);
+										xml = _insertTag(
+											xml, "groupId", "version", version,
+											indent);
 									}
+
+									newContent = xml.getBytes(
+										StandardCharsets.UTF_8);
 								}
-								else if (name.endsWith("pom.properties")) {
+								else if (fileName.endsWith("pom.properties")) {
 									Properties props = new Properties();
 
 									props.load(
 										new ByteArrayInputStream(
-											entryContent.toByteArray()));
+											byteArrayOutputStream.
+												toByteArray()));
 
 									props.setProperty("groupId", groupId);
 									props.setProperty("artifactId", artifactId);
 									props.setProperty("version", version);
 
-									ByteArrayOutputStream propsOut =
-										new ByteArrayOutputStream();
+									ByteArrayOutputStream
+										propsByteArrayOutputStream =
+											new ByteArrayOutputStream();
 
-									props.store(propsOut, null);
+									props.store(
+										propsByteArrayOutputStream, null);
 
-									newContent = propsOut.toByteArray();
+									newContent =
+										propsByteArrayOutputStream.
+											toByteArray();
 								}
 								else {
-									newContent = entryContent.toByteArray(); // Leave other entries unchanged
+									newContent =
+										byteArrayOutputStream.toByteArray(); // Leave other entries unchanged
 								}
 
 								jarOutputStream.putNextEntry(
-									new JarEntry(entry.getName()));
+									new JarEntry(jarEntry.getName()));
 
 								jarOutputStream.write(newContent);
 
@@ -222,69 +240,77 @@ public class JarPostProcessorPlugin implements Plugin<Project> {
 								StandardCopyOption.REPLACE_EXISTING);
 							//project.getLogger().lifecycle("Updated pom.xml and pom.properties in: " + file.getName());
 						}
-						catch (Exception e) {
+						catch (Exception exception) {
 							throw new RuntimeException(
-								"Failed to post-process JAR", e);
+								"Failed to post-process JAR", exception);
 						}
 					});
 			});
 	}
 
-	private String insertAfterTag(
-		String xml, String afterTag, String newTag, String newValue,
+	private String _insertTag(
+		String xml, String previousTag, String newTag, String value,
 		String indent) {
 
 		Pattern pattern = Pattern.compile(
-			"(?m)^" + Pattern.quote(indent) + "<" + afterTag + ">.*?</" +
-				afterTag + ">");
+			"(?m)^" + Pattern.quote(indent) + "<" + previousTag + ">.*?</" +
+				previousTag + ">");
 
 		Matcher matcher = pattern.matcher(xml);
 
 		if (matcher.find()) {
-			int insertPos = matcher.end();
-			String insert =
-				"\n" + indent + "<" + newTag + ">" + newValue + "</" + newTag +
+			int index = matcher.end();
+
+			String line =
+				"\n" + indent + "<" + newTag + ">" + value + "</" + newTag +
 					">";
 
-			return xml.substring(0, insertPos) + insert +
-				xml.substring(insertPos);
+			return xml.substring(0, index) + line + xml.substring(index);
 		}
 
 		throw new IllegalStateException(
-			"Could not find <" + afterTag + "> to insert after.");
+			"Could not find <" + previousTag + "> to insert after.");
 	}
 
-	private void setElement(
-		Element parent, String tag, String newValue, String insertAfterTag) {
+	/*	private void _setElement(
+			Element parent, String tag, String newValue, String insertAfterTag) {
 
-		Element existing = parent.selectFirst("> " + tag);
+			Element existing = parent.selectFirst("> " + tag);
 
-		if (existing != null) {
-			existing.text(newValue);
+			if (existing != null) {
+				existing.text(newValue);
 
-			return;
-		}
+				return;
+			}
 
-		Element newElem = new Element(
-			tag
-		).text(
-			newValue
-		);
+			Element newElem = new Element(
+				tag
+			).text(
+				newValue
+			);
 
-		if (insertAfterTag != null) {
-			Element afterElem = parent.selectFirst("> " + insertAfterTag);
+			if (insertAfterTag != null) {
+				Element afterElem = parent.selectFirst("> " + insertAfterTag);
 
-			if (afterElem != null) {
-				afterElem.after(new TextNode("\n  ", ""), newElem);
+				if (afterElem != null) {
+					afterElem.after(new TextNode("\n  ", ""), newElem);
+				}
+				else {
+					parent.appendChild(new TextNode("\n  ", ""));
+					parent.appendChild(newElem);
+				}
 			}
 			else {
-				parent.appendChild(new TextNode("\n  ", ""));
 				parent.appendChild(newElem);
 			}
 		}
-		else {
-			parent.appendChild(newElem);
-		}
-	}
+	*/
+
+	private static final Pattern _artifactIdPattern = Pattern.compile(
+		"(?m)^([ \t]*)<artifactId>(.*?)</artifactId>");
+	private static final Pattern _groupIdPattern = Pattern.compile(
+		"(?m)^([ \t]*)<groupId>(.*?)</groupId>");
+	private static final Pattern _versionPattern = Pattern.compile(
+		"(?m)^([ \t]*)<version>(.*?)</version>");
 
 }
