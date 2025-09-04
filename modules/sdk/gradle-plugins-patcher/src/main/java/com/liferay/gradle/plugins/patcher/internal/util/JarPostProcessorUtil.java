@@ -26,6 +26,20 @@ import java.util.jar.Manifest;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+
+import org.w3c.dom.Document;
+import org.w3c.dom.NodeList;
+import org.w3c.dom.Node;
+import org.w3c.dom.Element;
+
+import javax.xml.transform.dom.DOMSource;
+import javax.xml.transform.Transformer;
+import javax.xml.transform.TransformerFactory;
+import javax.xml.transform.stream.StreamResult;
+import javax.xml.transform.OutputKeys;
+
 /**
  * @author Istvan Sajtos
  */
@@ -156,7 +170,7 @@ public class JarPostProcessorUtil {
 			return byteArrayOutputStream.toByteArray();
 		}
 	}
-
+/*
 	private static byte[] _processPomXml(
 			byte[] bytes, String groupId, String artifactId, String version)
 		throws IOException {
@@ -207,6 +221,68 @@ public class JarPostProcessorUtil {
 		}
 
 		return content.getBytes(StandardCharsets.UTF_8);
+	}
+*/
+
+	private static byte[] _processPomXml(byte[] bytes, String groupId, String artifactId, String version)
+			throws Exception {
+
+		DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
+
+		factory.setNamespaceAware(false);
+
+		DocumentBuilder builder = factory.newDocumentBuilder();
+
+		Document document;
+		
+		try (ByteArrayInputStream byteArrayInputStream =
+				new ByteArrayInputStream(bytes)) {
+			document = builder.parse(byteArrayInputStream);
+		}
+
+		Element project = document.getDocumentElement();
+
+		// groupId
+		updateOrCreateChild(project, "groupId", groupId, document);
+		// artifactId
+		updateOrCreateChild(project, "artifactId", artifactId, document);
+		// version
+		updateOrCreateChild(project, "version", version, document);
+
+		TransformerFactory transformerFactory =
+			TransformerFactory.newInstance();
+
+		Transformer transformer = transformerFactory.newTransformer();
+
+		transformer.setOutputProperty(OutputKeys.INDENT, "yes");
+		transformer.setOutputProperty("{http://xml.apache.org/xslt}indent-amount", "4");
+
+		try (ByteArrayOutputStream byteArrayOutputStream =
+				new ByteArrayOutputStream()) {
+			transformer.transform(new DOMSource(document), new StreamResult(byteArrayOutputStream));
+
+			return byteArrayOutputStream.toByteArray();
+		}
+	}
+
+	private static void updateOrCreateChild(Element parent, String tagName, String value, Document document) {
+
+		NodeList nodes = parent.getElementsByTagName(tagName);
+
+		for (int i = 0; i < nodes.getLength(); i++) {
+			Node node = nodes.item(i);
+			if (node.getParentNode() == parent) {
+				node.setTextContent(value);
+
+				return;
+			}
+		}
+
+		Element newElement = document.createElement(tagName);
+
+		newElement.setTextContent(value);
+
+		parent.appendChild(newElement);
 	}
 
 	private static final Pattern _artifactIdPattern = Pattern.compile(
