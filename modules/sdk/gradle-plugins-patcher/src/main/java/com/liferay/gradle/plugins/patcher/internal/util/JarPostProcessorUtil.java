@@ -104,6 +104,8 @@ public class JarPostProcessorUtil {
 			Files.move(
 				tempFile.toPath(), jar.toPath(),
 				StandardCopyOption.REPLACE_EXISTING);
+
+			System.out.println(">>>JarPostProcessorUtil; jar path is " + jar.toPath);
 		}
 		catch (Exception exception) {
 			throw new RuntimeException("Failed to post-process JAR", exception);
