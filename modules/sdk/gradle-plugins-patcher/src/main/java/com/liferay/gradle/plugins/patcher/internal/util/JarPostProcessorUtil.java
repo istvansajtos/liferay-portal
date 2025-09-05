@@ -265,7 +265,7 @@ public class JarPostProcessorUtil {
 		}
 	}
 
-	private static void updateOrCreateChild(Element parent, String tagName, String value, Document document, String previousTag, String nextTag) {
+	private static void updateOrCreateChild(Element parent, String tagName, String value, Document document, String siblingTag, boolean insertBefore) {
 
 		NodeList nodes = parent.getElementsByTagName(tagName);
 
@@ -283,27 +283,17 @@ public class JarPostProcessorUtil {
 
 		newElement.setTextContent(value);
 
-		if (previousTag != null) {
-			NodeList previousNodes = parent.getElementsByTagName(previousTag);
+		if (siblingTag != null) {
+			NodeList siblingNodes = parent.getElementsByTagName(siblingTag);
 
-			for (int i = 0; i < previousNodes.getLength(); i++) {
-				Node node = previousNodes.item(i);
-
-				if (node.getParentNode() == parent) {
-					parent.insertAfter(newElement, node);
-
-					return;
-				}
-			}
-		}
-
-		if (nextTag != null) {
-			NodeList nextNodes = parent.getElementsByTagName(nextTag);
-
-			for (int i = 0; i < nextNodes.getLength(); i++) {
-				Node node = nextNodes.item(i);
+			for (int i = 0; i < siblingNodes.getLength(); i++) {
+				Node node = siblingNodes.item(i);
 
 				if (node.getParentNode() == parent) {
+					if (!insertBefore && (node.getNextSibling() != null)) {
+						node = node.getNextSibling();
+					}
+
 					parent.insertBefore(newElement, node);
 
 					return;
