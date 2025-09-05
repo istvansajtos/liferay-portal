@@ -12,7 +12,6 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 
-import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.StandardCopyOption;
 
@@ -28,17 +27,16 @@ import java.util.regex.Pattern;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
-
-import org.w3c.dom.Document;
-import org.w3c.dom.NodeList;
-import org.w3c.dom.Node;
-import org.w3c.dom.Element;
-
-import javax.xml.transform.dom.DOMSource;
+import javax.xml.transform.OutputKeys;
 import javax.xml.transform.Transformer;
 import javax.xml.transform.TransformerFactory;
+import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
-import javax.xml.transform.OutputKeys;
+
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
 
 /**
  * @author Istvan Sajtos
@@ -119,35 +117,12 @@ public class JarPostProcessorUtil {
 				tempFile.toPath(), jar.toPath(),
 				StandardCopyOption.REPLACE_EXISTING);
 
-			System.out.println(">>>JarPostProcessorUtil; jar path is " + jar.toPath());
+			System.out.println(
+				">>>JarPostProcessorUtil; jar path is " + jar.toPath());
 		}
 		catch (Exception exception) {
 			throw new RuntimeException("Failed to post-process JAR", exception);
 		}
-	}
-
-	private static String _insertTag(
-		String xml, String previousTag, String newTag, String value,
-		String indent) {
-
-		Pattern pattern = Pattern.compile(
-			"(?m)^" + Pattern.quote(indent) + "<" + previousTag + ">.*?</" +
-				previousTag + ">");
-
-		Matcher matcher = pattern.matcher(xml);
-
-		if (matcher.find()) {
-			int index = matcher.end();
-
-			String line =
-				"\n" + indent + "<" + newTag + ">" + value + "</" + newTag +
-					">";
-
-			return xml.substring(0, index) + line + xml.substring(index);
-		}
-
-		throw new IllegalStateException(
-			"Could not find <" + previousTag + "> to insert after.");
 	}
 
 	private static byte[] _processPomProperties(
@@ -170,84 +145,52 @@ public class JarPostProcessorUtil {
 			return byteArrayOutputStream.toByteArray();
 		}
 	}
-/*
+
 	private static byte[] _processPomXml(
 			byte[] bytes, String groupId, String artifactId, String version)
-		throws IOException {
+		throws Exception {
 
-		String content = new String(bytes, StandardCharsets.UTF_8);
+		// 		DocumentBuilderFactory documentBuilderFactory =
 
-		Matcher artifactIdMatcher = _artifactIdPattern.matcher(content);
+		//			SecureXMLFactoryProviderUtil.newDocumentBuilderFactory();
 
-		if (!artifactIdMatcher.find()) {
-			throw new IllegalStateException(
-				"No <artifactId> found in pom.content");
-		}
+		DocumentBuilderFactory documentBuilderFactory =
+			DocumentBuilderFactory.newInstance();
 
-		// Replace artifactId
+		documentBuilderFactory.setIgnoringElementContentWhitespace(true);
+		documentBuilderFactory.setFeature(
+			"http://apache.org/xml/features/nonvalidating/load-external-dtd",
+			false);
 
-		String indent = artifactIdMatcher.group(1);
-
-		String artifactIdTag =
-			indent + "<artifactId>" + artifactId + "</artifactId>";
-
-		content = artifactIdMatcher.replaceFirst(
-			Matcher.quoteReplacement(artifactIdTag));
-
-		// Insert or update groupId
-
-		Matcher groupIdMatcher = _groupIdPattern.matcher(content);
-
-		if (groupIdMatcher.find()) {
-			content = groupIdMatcher.replaceFirst(
-				indent + "<groupId>" + groupId + "</groupId>");
-		}
-		else {
-			content = _insertTag(
-				content, "artifactId", "groupId", groupId, indent);
-		}
-
-		// Insert or update version
-
-		Matcher versionMatcher = _versionPattern.matcher(content);
-
-		if (versionMatcher.find()) {
-			content = versionMatcher.replaceFirst(
-				indent + "<version>" + version + "</version>");
-		}
-		else {
-			content = _insertTag(
-				content, "groupId", "version", version, indent);
-		}
-
-		return content.getBytes(StandardCharsets.UTF_8);
-	}
-*/
-
-	private static byte[] _processPomXml(byte[] bytes, String groupId, String artifactId, String version)
-			throws Exception {
-
-		DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
-
-		factory.setNamespaceAware(false);
-
-		DocumentBuilder builder = factory.newDocumentBuilder();
+		DocumentBuilder documentBuilder =
+			documentBuilderFactory.newDocumentBuilder();
 
 		Document document;
-		
+
 		try (ByteArrayInputStream byteArrayInputStream =
 				new ByteArrayInputStream(bytes)) {
-			document = builder.parse(byteArrayInputStream);
+
+			document = documentBuilder.parse(byteArrayInputStream);
 		}
 
 		Element project = document.getDocumentElement();
 
 		// groupId
-		updateOrCreateChild(project, "groupId", groupId, document);
+
+		_updateOrCreateChild(
+			project, "groupId", groupId, document, "artifactId", true);
+
 		// artifactId
-		updateOrCreateChild(project, "artifactId", artifactId, document);
+
+		_updateOrCreateChild(
+			project, "artifactId", artifactId, document, null, null);
+
 		// version
-		updateOrCreateChild(project, "version", version, document);
+
+		_updateOrCreateChild(
+			project, "version", version, document, "artifactId", false);
+
+		removeWhitespaceNodes(project);
 
 		TransformerFactory transformerFactory =
 			TransformerFactory.newInstance();
@@ -255,22 +198,96 @@ public class JarPostProcessorUtil {
 		Transformer transformer = transformerFactory.newTransformer();
 
 		transformer.setOutputProperty(OutputKeys.INDENT, "yes");
-		transformer.setOutputProperty("{http://xml.apache.org/xslt}indent-amount", "4");
+		//transformer.setOutputProperty("{http://xml.apache.org/xslt}indent-amount", "4");
 
 		try (ByteArrayOutputStream byteArrayOutputStream =
 				new ByteArrayOutputStream()) {
-			transformer.transform(new DOMSource(document), new StreamResult(byteArrayOutputStream));
+
+			transformer.transform(
+				new DOMSource(document),
+				new StreamResult(byteArrayOutputStream));
 
 			return byteArrayOutputStream.toByteArray();
 		}
 	}
 
-	private static void updateOrCreateChild(Element parent, String tagName, String value, Document document) {
+	private static void removeWhitespaceNodes(Element element) {
+		NodeList children = element.getChildNodes();
+		for (int i = children.getLength() - 1; i >= 0; i--) {
+			Node child = children.item(i);
+			if (child.getNodeType() == Node.TEXT_NODE) {
+				if (child.getTextContent().trim().isEmpty()) {
+					element.removeChild(child);
+				}
+			} else if (child.getNodeType() == Node.ELEMENT_NODE) {
+				removeWhitespaceNodes((Element) child);
+			}
+		}
+	}
+
+	/*
+		private static byte[] _processPomXml(
+				byte[] bytes, String groupId, String artifactId, String version)
+			throws IOException {
+			String content = new String(bytes, StandardCharsets.UTF_8);
+
+			Matcher artifactIdMatcher = _artifactIdPattern.matcher(content);
+
+			if (!artifactIdMatcher.find()) {
+				throw new IllegalStateException(
+					"No <artifactId> found in pom.content");
+			}
+
+			// Replace artifactId
+
+			String indent = artifactIdMatcher.group(1);
+
+			String artifactIdTag =
+				indent + "<artifactId>" + artifactId + "</artifactId>";
+
+			content = artifactIdMatcher.replaceFirst(
+				Matcher.quoteReplacement(artifactIdTag));
+
+			// Insert or update groupId
+
+			Matcher groupIdMatcher = _groupIdPattern.matcher(content);
+
+			if (groupIdMatcher.find()) {
+				content = groupIdMatcher.replaceFirst(
+					indent + "<groupId>" + groupId + "</groupId>");
+			}
+			else {
+				content = _insertTag(
+					content, "artifactId", "groupId", groupId, indent);
+			}
+
+			// Insert or update version
+
+			Matcher versionMatcher = _versionPattern.matcher(content);
+
+			if (versionMatcher.find()) {
+				content = versionMatcher.replaceFirst(
+					indent + "<version>" + version + "</version>");
+			}
+			else {
+				content = _insertTag(
+					content, "groupId", "version", version, indent);
+			}
+
+			return content.getBytes(StandardCharsets.UTF_8);
+		}
+
+	*/
+
+	private static void _updateOrCreateChild(
+		Element parent, String tagName, String value, Document document,
+		String siblingTag, Boolean insertBefore) {
 
 		NodeList nodes = parent.getElementsByTagName(tagName);
 
 		for (int i = 0; i < nodes.getLength(); i++) {
 			Node node = nodes.item(i);
+
 			if (node.getParentNode() == parent) {
 				node.setTextContent(value);
 
@@ -282,7 +299,49 @@ public class JarPostProcessorUtil {
 
 		newElement.setTextContent(value);
 
+		if (siblingTag != null) {
+			NodeList siblingNodes = parent.getElementsByTagName(siblingTag);
+
+			for (int i = 0; i < siblingNodes.getLength(); i++) {
+				Node node = siblingNodes.item(i);
+
+				if (node.getParentNode() == parent) {
+					if (!insertBefore && (node.getNextSibling() != null)) {
+						node = node.getNextSibling();
+					}
+
+					parent.insertBefore(newElement, node);
+
+					return;
+				}
+			}
+		}
+
 		parent.appendChild(newElement);
+	}
+
+	private String _insertTag(
+		String xml, String previousTag, String newTag, String value,
+		String indent) {
+
+		Pattern pattern = Pattern.compile(
+			"(?m)^" + Pattern.quote(indent) + "<" + previousTag + ">.*?</" +
+				previousTag + ">");
+
+		Matcher matcher = pattern.matcher(xml);
+
+		if (matcher.find()) {
+			int index = matcher.end();
+
+			String line =
+				"\n" + indent + "<" + newTag + ">" + value + "</" + newTag +
+					">";
+
+			return xml.substring(0, index) + line + xml.substring(index);
+		}
+
+		throw new IllegalStateException(
+			"Could not find <" + previousTag + "> to insert after.");
 	}
 
 	private static final Pattern _artifactIdPattern = Pattern.compile(
