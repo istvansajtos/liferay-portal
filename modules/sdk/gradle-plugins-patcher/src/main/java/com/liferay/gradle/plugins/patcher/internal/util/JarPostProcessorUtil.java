@@ -243,11 +243,11 @@ public class JarPostProcessorUtil {
 		Element project = document.getDocumentElement();
 
 		// groupId
-		updateOrCreateChild(project, "groupId", groupId, document);
+		updateOrCreateChild(project, "groupId", groupId, document, null, "artifactId");
 		// artifactId
-		updateOrCreateChild(project, "artifactId", artifactId, document);
+		updateOrCreateChild(project, "artifactId", artifactId, document, null, null);
 		// version
-		updateOrCreateChild(project, "version", version, document);
+		updateOrCreateChild(project, "version", version, document, "artifactId", null);
 
 		TransformerFactory transformerFactory =
 			TransformerFactory.newInstance();
@@ -255,7 +255,7 @@ public class JarPostProcessorUtil {
 		Transformer transformer = transformerFactory.newTransformer();
 
 		transformer.setOutputProperty(OutputKeys.INDENT, "yes");
-		transformer.setOutputProperty("{http://xml.apache.org/xslt}indent-amount", "4");
+		//transformer.setOutputProperty("{http://xml.apache.org/xslt}indent-amount", "4");
 
 		try (ByteArrayOutputStream byteArrayOutputStream =
 				new ByteArrayOutputStream()) {
@@ -265,12 +265,13 @@ public class JarPostProcessorUtil {
 		}
 	}
 
-	private static void updateOrCreateChild(Element parent, String tagName, String value, Document document) {
+	private static void updateOrCreateChild(Element parent, String tagName, String value, Document document, String previousTag, String nextTag) {
 
 		NodeList nodes = parent.getElementsByTagName(tagName);
 
 		for (int i = 0; i < nodes.getLength(); i++) {
 			Node node = nodes.item(i);
+
 			if (node.getParentNode() == parent) {
 				node.setTextContent(value);
 
@@ -281,6 +282,34 @@ public class JarPostProcessorUtil {
 		Element newElement = document.createElement(tagName);
 
 		newElement.setTextContent(value);
+
+		if (previousTag != null) {
+			NodeList previousNodes = parent.getElementsByTagName(previousTag);
+
+			for (int i = 0; i < previousNodes.getLength(); i++) {
+				Node node = previousNodes.item(i);
+
+				if (node.getParentNode() == parent) {
+					parent.insertAfter(newElement, node);
+
+					return;
+				}
+			}
+		}
+
+		if (nextTag != null) {
+			NodeList nextNodes = parent.getElementsByTagName(nextTag);
+
+			for (int i = 0; i < nextNodes.getLength(); i++) {
+				Node node = nextNodes.item(i);
+
+				if (node.getParentNode() == parent) {
+					parent.insertBefore(newElement, node);
+
+					return;
+				}
+			}
+		}
 
 		parent.appendChild(newElement);
 	}
