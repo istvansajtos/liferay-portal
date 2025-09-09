@@ -12,6 +12,7 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.StandardCopyOption;
 
@@ -22,8 +23,6 @@ import java.util.jar.JarFile;
 import java.util.jar.JarInputStream;
 import java.util.jar.JarOutputStream;
 import java.util.jar.Manifest;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -41,15 +40,15 @@ import org.w3c.dom.NodeList;
 /**
  * @author Istvan Sajtos
  */
-public class JarPostProcessorUtil {
+public class ArtifactPostProcessorUtil {
 
-	public static void processJar(
+	public static void postProcess(
 			File jar, String groupId, String artifactId, String version)
-		throws IOException {
+		throws Exception {
 
-		Manifest manifest = new JarFile(
-			jar
-		).getManifest();
+		JarFile jarFile = new JarFile(jar);
+
+		Manifest manifest = jarFile.getManifest();
 
 		if (manifest != null) {
 			Attributes attributes = manifest.getMainAttributes();
@@ -62,29 +61,10 @@ public class JarPostProcessorUtil {
 
 		try (JarInputStream jarInputStream = new JarInputStream(
 				new FileInputStream(jar));
-			JarOutputStream jarOutputStream = (manifest != null) ?
-				new JarOutputStream(new FileOutputStream(tempFile), manifest) :
-					new JarOutputStream(new FileOutputStream(tempFile))) {
+			JarOutputStream jarOutputStream = _getJarOutputStream(
+				manifest, tempFile)) {
 
-			/*File tempFile = new File(jar.getParent(), jar.getName() + ".tmp");
-
-			Manifest manifest = jarInputStream.getManifest();
-
-			if (manifest != null) {
-				Attributes attributes = manifest.getMainAttributes();
-
-				attributes.putValue("Bundle-SymbolicName", artifactId);
-				attributes.putValue("Bundle-Version", version);
-
-				jarOutputStream = new JarOutputStream(
-					new FileOutputStream(tempFile), manifest);
-			}
-			else {
-				jarOutputStream = new JarOutputStream(
-					new FileOutputStream(tempFile));
-			}*/
-
-			JarEntry jarEntry = null;
+			JarEntry jarEntry;
 
 			while ((jarEntry = jarInputStream.getNextJarEntry()) != null) {
 				String fileName = jarEntry.getName();
@@ -98,11 +78,11 @@ public class JarPostProcessorUtil {
 				byte[] content = jarInputStream.readAllBytes();
 
 				if (fileName.endsWith("pom.xml")) {
-					content = _processPomXml(
+					content = _getUpdatedPomXml(
 						content, groupId, artifactId, version);
 				}
 				else if (fileName.endsWith("pom.properties")) {
-					content = _processPomProperties(
+					content = _getUpdatedPomProperties(
 						content, groupId, artifactId, version);
 				}
 
@@ -118,16 +98,28 @@ public class JarPostProcessorUtil {
 				StandardCopyOption.REPLACE_EXISTING);
 
 			System.out.println(
-				">>>JarPostProcessorUtil; jar path is " + jar.toPath());
-		}
-		catch (Exception exception) {
-			throw new RuntimeException("Failed to post-process JAR", exception);
+				">>>ArtifactPostProcessorUtil; jar path is " + jar.toPath());
 		}
 	}
 
-	private static byte[] _processPomProperties(
+	private static JarOutputStream _getJarOutputStream(
+			Manifest manifest, File tempFile)
+		throws Exception {
+
+		if (manifest != null) {
+			return new JarOutputStream(
+				new FileOutputStream(tempFile), manifest);
+		}
+
+		return new JarOutputStream(new FileOutputStream(tempFile));
+	}
+
+	private static byte[] _getUpdatedPomProperties(
 			byte[] bytes, String groupId, String artifactId, String version)
 		throws IOException {
+
+		System.out.println(new String(bytes, StandardCharsets.UTF_8));
+		System.out.println("\n\n\n");
 
 		Properties props = new Properties();
 
@@ -146,13 +138,11 @@ public class JarPostProcessorUtil {
 		}
 	}
 
-	private static byte[] _processPomXml(
+	private static byte[] _getUpdatedPomXml(
 			byte[] bytes, String groupId, String artifactId, String version)
 		throws Exception {
 
-		// 		DocumentBuilderFactory documentBuilderFactory =
-
-		//			SecureXMLFactoryProviderUtil.newDocumentBuilderFactory();
+		System.out.println(new String(bytes, StandardCharsets.UTF_8));
 
 		DocumentBuilderFactory documentBuilderFactory =
 			DocumentBuilderFactory.newInstance();
@@ -175,22 +165,16 @@ public class JarPostProcessorUtil {
 
 		Element project = document.getDocumentElement();
 
-		// groupId
-
 		_updateOrCreateChild(
 			project, "groupId", groupId, document, "artifactId", true);
-
-		// artifactId
 
 		_updateOrCreateChild(
 			project, "artifactId", artifactId, document, null, null);
 
-		// version
-
 		_updateOrCreateChild(
 			project, "version", version, document, "artifactId", false);
 
-		removeWhitespaceNodes(project);
+		_removeWhitespaceNodes(project);
 
 		TransformerFactory transformerFactory =
 			TransformerFactory.newInstance();
@@ -198,7 +182,8 @@ public class JarPostProcessorUtil {
 		Transformer transformer = transformerFactory.newTransformer();
 
 		transformer.setOutputProperty(OutputKeys.INDENT, "yes");
-		//transformer.setOutputProperty("{http://xml.apache.org/xslt}indent-amount", "4");
+		//transformer.setOutputProperty(
+		//	"{http://xml.apache.org/xslt}indent-amount", "4");
 
 		try (ByteArrayOutputStream byteArrayOutputStream =
 				new ByteArrayOutputStream()) {
@@ -211,73 +196,26 @@ public class JarPostProcessorUtil {
 		}
 	}
 
-	private static void removeWhitespaceNodes(Element element) {
+	private static void _removeWhitespaceNodes(Element element) {
 		NodeList children = element.getChildNodes();
+
 		for (int i = children.getLength() - 1; i >= 0; i--) {
 			Node child = children.item(i);
+
 			if (child.getNodeType() == Node.TEXT_NODE) {
-				if (child.getTextContent().trim().isEmpty()) {
+				String textContent = child.getTextContent();
+
+				textContent = textContent.trim();
+
+				if (textContent.isEmpty()) {
 					element.removeChild(child);
 				}
-			} else if (child.getNodeType() == Node.ELEMENT_NODE) {
-				removeWhitespaceNodes((Element) child);
+			}
+			else if (child.getNodeType() == Node.ELEMENT_NODE) {
+				_removeWhitespaceNodes((Element)child);
 			}
 		}
 	}
-
-	/*
-		private static byte[] _processPomXml(
-				byte[] bytes, String groupId, String artifactId, String version)
-			throws IOException {
-			String content = new String(bytes, StandardCharsets.UTF_8);
-
-			Matcher artifactIdMatcher = _artifactIdPattern.matcher(content);
-
-			if (!artifactIdMatcher.find()) {
-				throw new IllegalStateException(
-					"No <artifactId> found in pom.content");
-			}
-
-			// Replace artifactId
-
-			String indent = artifactIdMatcher.group(1);
-
-			String artifactIdTag =
-				indent + "<artifactId>" + artifactId + "</artifactId>";
-
-			content = artifactIdMatcher.replaceFirst(
-				Matcher.quoteReplacement(artifactIdTag));
-
-			// Insert or update groupId
-
-			Matcher groupIdMatcher = _groupIdPattern.matcher(content);
-
-			if (groupIdMatcher.find()) {
-				content = groupIdMatcher.replaceFirst(
-					indent + "<groupId>" + groupId + "</groupId>");
-			}
-			else {
-				content = _insertTag(
-					content, "artifactId", "groupId", groupId, indent);
-			}
-
-			// Insert or update version
-
-			Matcher versionMatcher = _versionPattern.matcher(content);
-
-			if (versionMatcher.find()) {
-				content = versionMatcher.replaceFirst(
-					indent + "<version>" + version + "</version>");
-			}
-			else {
-				content = _insertTag(
-					content, "groupId", "version", version, indent);
-			}
-
-			return content.getBytes(StandardCharsets.UTF_8);
-		}
-
-	*/
 
 	private static void _updateOrCreateChild(
 		Element parent, String tagName, String value, Document document,
@@ -319,36 +257,5 @@ public class JarPostProcessorUtil {
 
 		parent.appendChild(newElement);
 	}
-
-	private String _insertTag(
-		String xml, String previousTag, String newTag, String value,
-		String indent) {
-
-		Pattern pattern = Pattern.compile(
-			"(?m)^" + Pattern.quote(indent) + "<" + previousTag + ">.*?</" +
-				previousTag + ">");
-
-		Matcher matcher = pattern.matcher(xml);
-
-		if (matcher.find()) {
-			int index = matcher.end();
-
-			String line =
-				"\n" + indent + "<" + newTag + ">" + value + "</" + newTag +
-					">";
-
-			return xml.substring(0, index) + line + xml.substring(index);
-		}
-
-		throw new IllegalStateException(
-			"Could not find <" + previousTag + "> to insert after.");
-	}
-
-	private static final Pattern _artifactIdPattern = Pattern.compile(
-		"(?m)^([ \t]*)<artifactId>(.*?)</artifactId>");
-	private static final Pattern _groupIdPattern = Pattern.compile(
-		"(?m)^([ \t]*)<groupId>(.*?)</groupId>");
-	private static final Pattern _versionPattern = Pattern.compile(
-		"(?m)^([ \t]*)<version>(.*?)</version>");
 
 }
