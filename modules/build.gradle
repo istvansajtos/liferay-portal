@@ -752,6 +752,10 @@ gradle.beforeProject {
 			}
 		}
 
+		if (project.path.startsWith(":third-party:")) {
+			pluginManager.apply("com.liferay.artifactpostprocessor")
+		}
+
 		pluginManager.withPlugin("com.liferay.portal.tools.rest.builder") {
 			File dir = new File(rootDir.parentFile, "modules/util/portal-tools-rest-builder")
 
