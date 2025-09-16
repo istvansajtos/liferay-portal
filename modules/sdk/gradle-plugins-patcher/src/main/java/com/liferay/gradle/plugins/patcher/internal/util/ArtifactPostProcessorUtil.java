@@ -163,6 +163,8 @@ public class ArtifactPostProcessorUtil {
 		_updateOrCreateChild(
 			project, "version", version, document, "artifactId", false);
 
+		_removeWhitespaceNodes(project);
+
 		TransformerFactory transformerFactory =
 			TransformerFactory.newInstance();
 
@@ -178,6 +180,27 @@ public class ArtifactPostProcessorUtil {
 				new StreamResult(byteArrayOutputStream));
 
 			return byteArrayOutputStream.toByteArray();
+		}
+	}
+
+	private static void _removeWhitespaceNodes(Element element) {
+		NodeList children = element.getChildNodes();
+
+		for (int i = children.getLength() - 1; i >= 0; i--) {
+			Node child = children.item(i);
+
+			if (child.getNodeType() == Node.TEXT_NODE) {
+				String textContent = child.getTextContent();
+
+				textContent = textContent.trim();
+
+				if (textContent.isEmpty()) {
+					element.removeChild(child);
+				}
+			}
+			else if (child.getNodeType() == Node.ELEMENT_NODE) {
+				_removeWhitespaceNodes((Element)child);
+			}
 		}
 	}
 
