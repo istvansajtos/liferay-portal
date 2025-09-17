@@ -58,7 +58,7 @@
 
 		<zip
 			basedir="${tstamp.value}"
-			destfile="${project.dir}/lib/portal/json-java.jar.new"
+			destfile="${project.dir}/lib/portal/json-20231013.jar.new"
 		/>
 
 		<delete dir="${tstamp.value}" />

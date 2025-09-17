@@ -11,7 +11,7 @@
 	<path id="web-lib.classpath">
 		<fileset
 			dir="${project.dir}/lib/development"
-			includes="junit.jar"
+			includes="junit-4.13.1.jar"
 		/>
 	</path>
 

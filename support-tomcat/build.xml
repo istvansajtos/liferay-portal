@@ -12,11 +12,11 @@
 	<path id="web-lib.classpath">
 		<fileset
 			dir="${project.dir}/lib/development"
-			includes="catalina-ha.jar,catalina.jar,tomcat-jasper.jar,tomcat-api.jar,tomcat-coyote.jar,tomcat-tribes.jar,tomcat-util-scan.jar,tomcat-util.jar"
+			includes="tomcat-catalina-ha-10.1.43.jar,tomcat-catalina-10.1.43.jar,tomcat-jasper-10.1.43.jar,tomcat-api-10.1.43.jar,tomcat-coyote-10.1.43.jar,tomcat-tribes-10.1.43.jar,tomcat-util-scan-10.1.43.jar,tomcat-util-10.1.43.jar"
 		/>
 		<fileset
 			dir="${project.dir}/lib/portal"
-			includes="tomcat-juli.jar"
+			includes="tomcat-juli-10.1.43.jar"
 		/>
 	</path>
 </project>

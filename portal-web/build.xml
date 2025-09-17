@@ -15,18 +15,18 @@
 		<pathelement location="${project.dir}/util-bridges/util-bridges.jar" />
 		<pathelement location="${project.dir}/util-java/util-java.jar" />
 		<pathelement location="${project.dir}/util-taglib/util-taglib.jar" />
-		<pathelement location="${project.dir}/lib/development/activation.jar" />
-		<pathelement location="${project.dir}/lib/development/jstl-api.jar" />
-		<pathelement location="${project.dir}/lib/development/jstl-impl.jar" />
-		<pathelement location="${project.dir}/lib/development/mail.jar" />
-		<pathelement location="${project.dir}/lib/development/portlet.jar" />
+		<pathelement location="${project.dir}/lib/development/jakarta.activation-api-2.1.3.jar" />
+		<pathelement location="${project.dir}/lib/development/jakarta.servlet.jsp.jstl-api-3.0.2.jar" />
+		<pathelement location="${project.dir}/lib/development/jakarta.servlet.jsp.jstl-3.0.1.jar" />
+		<pathelement location="${project.dir}/lib/development/jakarta.mail-api-2.1.3.jar" />
+		<pathelement location="${project.dir}/lib/development/com.liferay.jakarta.portlet-api-4.0.0.jar" />
 		<pathelement location="${project.dir}/lib/development/velocity.jar" />
-		<pathelement location="${project.dir}/lib/portal/commons-lang.jar" />
-		<pathelement location="${project.dir}/lib/portal/commons-logging.jar" />
-		<pathelement location="${project.dir}/lib/portal/dom4j.jar" />
-		<pathelement location="${project.dir}/lib/portal/jabsorb.jar" />
-		<pathelement location="${project.dir}/lib/portal/log4j-api.jar" />
-		<pathelement location="${project.dir}/lib/portal/log4j-core.jar" />
+		<pathelement location="${project.dir}/lib/portal/commons-lang-2.6.jar" />
+		<pathelement location="${project.dir}/lib/portal/org.apache.commons.logging-1.2.LIFERAY-PATCHED-2.jar" />
+		<pathelement location="${project.dir}/lib/portal/dom4j-2.1.3.jar" />
+		<pathelement location="${project.dir}/lib/portal/org.jabsorb-1.3.2.LIFERAY-PATCHED-2.jar" />
+		<pathelement location="${project.dir}/lib/portal/org.apache.logging.log4j-2.17.1.LIFERAY-PATCHED-1.jar" />
+		<pathelement location="${project.dir}/lib/portal/org.apache.logging.log4j.core-2.17.1.LIFERAY-PATCHED-2.jar" />
 		<pathelement location="${project.dir}/lib/portal/openid4java.jar" />
 	</path>
 
@@ -201,15 +201,15 @@ ${oversize.files.jsp}</fail>
 		<path id="jspc.classpath">
 			<pathelement location="${jspc.java.home}/jre/lib/rt.jar" />
 			<path refid="jspc.common.classpath" />
-			<pathelement location="${project.dir}/lib/development/tomcat-api.jar" />
-			<pathelement location="${project.dir}/lib/development/tomcat-el-api.jar" />
-			<pathelement location="${project.dir}/lib/development/tomcat-jasper-el.jar" />
-			<pathelement location="${project.dir}/lib/development/tomcat-jasper.jar" />
-			<pathelement location="${project.dir}/lib/development/tomcat-jsp-api.jar" />
-			<pathelement location="${project.dir}/lib/development/tomcat-juli.jar" />
-			<pathelement location="${project.dir}/lib/development/tomcat-servlet-api.jar" />
-			<pathelement location="${project.dir}/lib/development/tomcat-util-scan.jar" />
-			<pathelement location="${project.dir}/lib/development/tomcat-util.jar" />
+			<pathelement location="${project.dir}/lib/development/tomcat-api-10.1.43.jar" />
+			<pathelement location="${project.dir}/lib/development/tomcat-el-api-10.1.43.jar" />
+			<pathelement location="${project.dir}/lib/development/tomcat-jasper-el-10.1.43.jar" />
+			<pathelement location="${project.dir}/lib/development/tomcat-jasper-10.1.43.jar" />
+			<pathelement location="${project.dir}/lib/development/tomcat-jsp-api-10.1.43.jar" />
+			<pathelement location="${project.dir}/lib/development/tomcat-juli-10.1.43.jar" />
+			<pathelement location="${project.dir}/lib/development/tomcat-servlet-api-10.1.43.jar" />
+			<pathelement location="${project.dir}/lib/development/tomcat-util-scan-10.1.43.jar" />
+			<pathelement location="${project.dir}/lib/development/tomcat-util-10.1.43.jar" />
 		</path>
 
 		<antcall inheritrefs="true" target="compile-common-jsp">

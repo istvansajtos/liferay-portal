@@ -18,7 +18,7 @@
 		/>
 		<fileset
 			dir="${project.dir}/lib/portal"
-			includes="commons-logging.jar"
+			includes="org.apache.commons.logging-1.2.LIFERAY-PATCHED-2.jar"
 		/>
 	</path>
 

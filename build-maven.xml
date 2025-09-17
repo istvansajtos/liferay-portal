@@ -201,7 +201,7 @@ Run "ant -f build-dist.xml all zip-portal-war" to generate that file.
 		/>
 
 		<zip
-			destfile="${tstamp.value}/dist/util-taglib-tlddoc.jar"
+			destfile="${tstamp.value}/dist/util-taglib-com.sun.tlddoc-1.3.LIFERAY-PATCHED-1.jar"
 		>
 			<zipfileset
 				dir="${doc.dir}/taglibs"

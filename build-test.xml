@@ -2854,13 +2854,13 @@ sendPasswordCaptchaEnabled=&quot;true&quot;</echo>
 					</if>
 
 					<copy
-						file="${test.app.server.lib.portal.dir}/hikaricp.jar"
-						tofile="${app.server.lib.global.dir}/hikaricp.jar"
+						file="${test.app.server.lib.portal.dir}/HikariCP-4.0.3.jar"
+						tofile="${app.server.lib.global.dir}/HikariCP-4.0.3.jar"
 					/>
 
 					<copy
-						file="${test.app.server.lib.portal.dir}/slf4j-api.jar"
-						tofile="${app.server.lib.global.dir}/slf4j-api.jar"
+						file="${test.app.server.lib.portal.dir}/slf4j-api-1.7.26.jar"
+						tofile="${app.server.lib.global.dir}/slf4j-api-1.7.26.jar"
 					/>
 
 					<if>
@@ -7380,7 +7380,7 @@ fi
 		<sequential>
 			<if>
 				<not>
-					<available file="${app.server.tomcat.dir}/bin/jacocoagent.jar" />
+					<available file="${app.server.tomcat.dir}/bin/org.jacoco.agent-0.8.4:runtime.jar" />
 				</not>
 				<then>
 					<copy
@@ -7390,7 +7390,7 @@ fi
 				</then>
 			</if>
 
-			<var name="jacoco.agent" value="-javaagent:${app.server.tomcat.dir}/bin/jacocoagent.jar${jacoco.agent.configuration}" />
+			<var name="jacoco.agent" value="-javaagent:${app.server.tomcat.dir}/bin/org.jacoco.agent-0.8.4:runtime.jar${jacoco.agent.configuration}" />
 
 			<if>
 				<not>

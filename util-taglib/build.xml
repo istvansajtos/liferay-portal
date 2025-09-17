@@ -136,7 +136,7 @@
 
 	<target depends="taglibdoc" name="jar-tlddoc">
 		<zip
-			destfile="util-taglib-tlddoc.jar"
+			destfile="util-taglib-com.sun.tlddoc-1.3.LIFERAY-PATCHED-1.jar"
 		>
 			<zipfileset
 				dir="${doc.dir}/taglibs/util-taglib"
@@ -148,7 +148,7 @@
 		<publish-portal-artifact targets="jar,jar-javadoc,jar-sources,jar-tlddoc">
 			<attach classifier="javadoc" file="${artifact.name}-javadoc.jar" />
 			<attach classifier="sources" file="${artifact.name}-sources.jar" />
-			<attach classifier="tlddoc" file="${artifact.name}-tlddoc.jar" />
+			<attach classifier="tlddoc" file="${artifact.name}-com.sun.tlddoc-1.3.LIFERAY-PATCHED-1.jar" />
 		</publish-portal-artifact>
 	</target>
 
@@ -156,7 +156,7 @@
 		<publish-portal-artifact snapshot="true" targets="jar,jar-javadoc,jar-sources,jar-tlddoc">
 			<attach classifier="javadoc" file="${artifact.name}-javadoc.jar" />
 			<attach classifier="sources" file="${artifact.name}-sources.jar" />
-			<attach classifier="tlddoc" file="${artifact.name}-tlddoc.jar" />
+			<attach classifier="tlddoc" file="${artifact.name}-com.sun.tlddoc-1.3.LIFERAY-PATCHED-1.jar" />
 		</publish-portal-artifact>
 	</target>
 

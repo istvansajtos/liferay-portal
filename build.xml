@@ -328,7 +328,7 @@ message.
 			<and>
 				<equals arg1="${app.server.type}" arg2="tomcat" />
 				<not>
-					<available file="${app.server.tomcat.classes.global.dir}/catalina.jar" />
+					<available file="${app.server.tomcat.classes.global.dir}/tomcat-catalina-10.1.43.jar" />
 				</not>
 			</and>
 			<then>
@@ -471,7 +471,7 @@ message.
 		>
 			<fileset
 				dir="lib/development"
-				includes="hsql.jar,mariadb.jar,mysql.jar,postgresql.jar"
+				includes="org.hsqldb-2.7.1.LIFERAY-PATCHED-1.jar,mariadb-java-client-3.2.0.jar,mysql-connector-j-8.3.0.jar,postgresql-42.4.4.jar"
 			/>
 		</copy>
 

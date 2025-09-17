@@ -82,7 +82,7 @@
 		<pathelement path="${classpath.full}" />
 		<fileset
 			dir="${project.dir}/lib/development"
-			includes="osgi-annotation-versioning.jar,osgi-core.jar,portlet.jar,tomcat-jsp-api.jar,mail.jar,tomcat-servlet-api.jar"
+			includes="org.osgi.annotation.versioning-1.1.0.jar,osgi.core-6.0.0.jar,com.liferay.jakarta.portlet-api-4.0.0.jar,tomcat-jsp-api-10.1.43.jar,jakarta.mail-api-2.1.3.jar,tomcat-servlet-api-10.1.43.jar"
 		/>
 		<path refid="lib.pre.classpath" />
 		<path refid="web-lib.classpath" />
@@ -144,7 +144,7 @@
 		</not>
 	</condition>
 
-	<property name="aspectj.agent" value="-javaagent:${project.dir}/lib/development/aspectj-weaver.jar" />
+	<property name="aspectj.agent" value="-javaagent:${project.dir}/lib/development/aspectjweaver-1.9.22.1.jar" />
 	<property name="aspectj.configuration" value="com/liferay/aspectj/aop.xml" />
 	<property name="definitions.dir" value="${project.dir}/definitions" />
 	<property name="doc.dir" value="${project.dir}/api" />
@@ -2003,7 +2003,7 @@ artifact.url=${remote.repository.cdn.url}/com/liferay/portal/com.liferay.${proce
 				<path refid="lib.pre.classpath" />
 				<fileset
 					dir="${project.dir}/lib/development"
-					excludes="jalopy.jar"
+					excludes="jalopy-1.5rc3.jar"
 					includes="*.jar"
 				/>
 				<fileset
@@ -2099,13 +2099,13 @@ artifact.url=${remote.repository.cdn.url}/com/liferay/portal/com.liferay.${proce
 		<sequential>
 			<if>
 				<not>
-					<available file="${ant.home}/lib/jsch.jar" />
+					<available file="${ant.home}/lib/jsch-0.1.55.jar" />
 				</not>
 				<then>
 					<trycatch>
 						<try>
 							<copy
-								file="${project.dir}/lib/development/jsch.jar"
+								file="${project.dir}/lib/development/jsch-0.1.55.jar"
 								todir="${ant.home}/lib"
 							/>
 						</try>
@@ -2113,14 +2113,14 @@ artifact.url=${remote.repository.cdn.url}/com/liferay/portal/com.liferay.${proce
 							<fail>
 .
 
-Please manually copy ${project.dir}/lib/development/jsch.jar to ${ant.home}/lib
+Please manually copy ${project.dir}/lib/development/jsch-0.1.55.jar to ${ant.home}/lib
 to install JSch. Then rerun your task.
 							</fail>
 						</catch>
 					</trycatch>
 
 					<if>
-						<available file="${ant.home}/lib/jsch.jar" />
+						<available file="${ant.home}/lib/jsch-0.1.55.jar" />
 						<then>
 							<fail>
 .
