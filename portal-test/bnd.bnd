@@ -33,19 +33,19 @@ Import-Package: *;resolution:=optional
 Include-Resource:\
 	classes,\
 	OSGI-INF/configurator=configurator,\
-	@${project.dir}/../lib/development/aspectj-rt.jar,\
-	@${project.dir}/../lib/development/commons-collections4.jar,\
-	@${project.dir}/../lib/development/commons-lang3.jar,\
-	@${project.dir}/../lib/development/dumbster.jar,\
-	@${project.dir}/../lib/development/hamcrest-core.jar,\
-	@${project.dir}/../lib/development/junit.jar,\
-	@${project.dir}/../lib/development/osgi-service-cm.jar,\
-	@${project.dir}/../lib/development/osgi-service-component.jar,\
-	@${project.dir}/../lib/development/osgi-service-log.jar,\
-	@${project.dir}/../lib/development/reflections.jar,\
-	@${project.dir}/../lib/development/sling-commons-osgi.jar,\
-	@${project.dir}/../lib/development/sling-testing-osgi-mock-core.jar,\
-	@${project.dir}/../lib/development/spring-test.jar
+	@${project.dir}/../lib/development/aspectjrt-1.9.22.1.jar,\
+	@${project.dir}/../lib/development/commons-collections4-4.4.jar,\
+	@${project.dir}/../lib/development/commons-lang3-3.18.0.jar,\
+	@${project.dir}/../lib/development/com.dumbster.smtp-02856255a6cc7f.jar,\
+	@${project.dir}/../lib/development/hamcrest-core-1.3.jar,\
+	@${project.dir}/../lib/development/junit-4.13.1.jar,\
+	@${project.dir}/../lib/development/org.osgi.service.cm-1.6.0.jar,\
+	@${project.dir}/../lib/development/org.osgi.service.component-1.4.0.jar,\
+	@${project.dir}/../lib/development/org.osgi.service.log-1.4.0.jar,\
+	@${project.dir}/../lib/development/reflections-0.9.12.jar,\
+	@${project.dir}/../lib/development/org.apache.sling.commons.osgi-2.4.0.jar,\
+	@${project.dir}/../lib/development/org.apache.sling.testing.osgi-mock.core-3.1.2.jar,\
+	@${project.dir}/../lib/development/spring-test-6.2.9.jar
 Require-Capability:\
 	osgi.ee;\
 		filter:="(&(osgi.ee=JavaSE)(version=${ant.build.javac.target}))",\
