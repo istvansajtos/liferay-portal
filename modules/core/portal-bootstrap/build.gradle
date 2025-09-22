@@ -77,7 +77,6 @@ bundle {
 copySystemPackagesExtraLibs {
 	from configurations.compileOnly
 	into "lib"
-	rename new RenameDependencyClosure(project, configurations.compileOnly.name)
 }
 
 dependencies {

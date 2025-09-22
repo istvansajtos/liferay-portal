@@ -329,22 +329,22 @@ Provide-Capability:\
 	@../../../lib/portal/org.springframework.tx-6.2.9.LIFERAY-PATCHED-1.jar,\
 	@../../../lib/portal/spring-web-6.2.9.jar,\
 	@../../../lib/portal/xercesImpl-2.12.2.jar,\
-	@../../../lib/portal/xml-apis-1.4.01.jar,\
+	@../../../lib/portal/xml-apis.jar,\
 	@../../../portal-impl/portal-impl.jar,\
 	@../../../portal-kernel/portal-kernel.jar,\
-	@lib/biz.aQute.bnd.annotation.jar!/aQute/bnd/annotation/metatype/*,\
-	@lib/com.liferay.osgi.service.tracker.collections.jar,\
-	@lib/com.liferay.petra.concurrent.jar,\
-	@lib/com.liferay.petra.executor.jar,\
-	@lib/com.liferay.petra.function.jar,\
-	@lib/com.liferay.petra.io.jar,\
-	@lib/com.liferay.petra.lang.jar,\
-	@lib/com.liferay.petra.memory.jar,\
-	@lib/com.liferay.petra.nio.jar,\
-	@lib/com.liferay.petra.process.jar,\
-	@lib/com.liferay.petra.reflect.jar,\
-	@lib/com.liferay.petra.sql.dsl.api.jar,\
-	@lib/com.liferay.petra.sql.dsl.spi.jar,\
-	@lib/com.liferay.petra.string.jar,\
-	@lib/com.liferay.petra.url.pattern.mapper.jar
+	@lib/biz.aQute.bnd.annotation-4.2.0.LIFERAY-PATCHED-2.jar!/aQute/bnd/annotation/metatype/*,\
+	@lib/com.liferay.osgi.service.tracker.collections-8.1.1.jar,\
+	@lib/com.liferay.petra.concurrent-5.1.8.jar,\
+	@lib/com.liferay.petra.executor-6.0.1.jar,\
+	@lib/com.liferay.petra.function-5.8.1.jar,\
+	@lib/com.liferay.petra.io-5.0.18.jar,\
+	@lib/com.liferay.petra.lang-6.0.1.jar,\
+	@lib/com.liferay.petra.memory-5.0.9.jar,\
+	@lib/com.liferay.petra.nio-5.0.6.jar,\
+	@lib/com.liferay.petra.process-5.0.13.jar,\
+	@lib/com.liferay.petra.reflect-7.2.1.jar,\
+	@lib/com.liferay.petra.sql.dsl.api-8.0.1.jar,\
+	@lib/com.liferay.petra.sql.dsl.spi-5.0.3.jar,\
+	@lib/com.liferay.petra.string-5.3.8.jar,\
+	@lib/com.liferay.petra.url.pattern.mapper-4.0.9.jar
 -removeheaders: Private-Package
