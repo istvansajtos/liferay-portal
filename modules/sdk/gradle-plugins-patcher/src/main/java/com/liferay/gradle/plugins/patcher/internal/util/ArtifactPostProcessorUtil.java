@@ -51,10 +51,11 @@ public class ArtifactPostProcessorUtil {
 		Manifest manifest = jarFile.getManifest();
 
 		if (manifest != null) {
-			Attributes attributes = manifest.getMainAttributes();
-
-			attributes.putValue("Bundle-SymbolicName", artifactId);
-			attributes.putValue("Bundle-Version", version);
+			_updateAttributes(manifest, _MANIFEST_NAME_KEYS, artifactId);
+			_updateAttributes(
+				manifest, _MANIFEST_VENDOR_ID_KEYS, "com.liferay");
+			_updateAttributes(manifest, _MANIFEST_VENDOR_KEYS, "Liferay, Inc");
+			_updateAttributes(manifest, _MANIFEST_VERSION_KEYS, version);
 		}
 
 		File newJar = new File(jar.getParent(), "new-" + jar.getName());
@@ -204,6 +205,18 @@ public class ArtifactPostProcessorUtil {
 		}
 	}
 
+	private static void _updateAttributes(
+		Manifest manifest, String[] keys, String value) {
+
+		Attributes attributes = manifest.getMainAttributes();
+
+		for (String key : keys) {
+			if (attributes.containsKey(new Attributes.Name(key))) {
+				attributes.putValue(key, value);
+			}
+		}
+	}
+
 	private static void _updateOrCreateChild(
 		Element parent, String tagName, String value, Document document,
 		String siblingTag, Boolean insertBefore) {
@@ -244,5 +257,23 @@ public class ArtifactPostProcessorUtil {
 
 		parent.appendChild(newElement);
 	}
+
+	private static final String[] _MANIFEST_NAME_KEYS = {
+		"Application-Name", "Automatic-Module-Name", "Bundle-Name",
+		"Bundle-SymbolicName", "Extension-Name", "Implementation-Title"
+	};
+
+	private static final String[] _MANIFEST_VENDOR_ID_KEYS = {
+		"Implementation-Vendor-Id"
+	};
+
+	private static final String[] _MANIFEST_VENDOR_KEYS = {
+		"Bundle-Vendor", "Implementation-Vendor"
+	};
+
+	private static final String[] _MANIFEST_VERSION_KEYS = {
+		"Build-Id", "Build-Version", "Bundle-Version",
+		"Implementation-Build-Id", "Implementation-Version", "Major-Version"
+	};
 
 }
