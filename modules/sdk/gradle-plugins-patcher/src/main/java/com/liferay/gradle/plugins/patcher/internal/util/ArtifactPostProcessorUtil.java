@@ -11,6 +11,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -80,24 +81,28 @@ public class ArtifactPostProcessorUtil {
 					continue;
 				}
 
-				byte[] content = jarInputStream.readAllBytes();
+				try (InputStream entryInputStream = jarFile.getInputStream(
+						entry)) {
 
-				if (!_isMultiPomJar(jar)) {
-					if (fileName.equalsIgnoreCase("pom.xml")) {
-						content = _getUpdatedPomXml(
-							content, groupId, artifactId, version);
+					byte[] content = entryInputStream.readAllBytes();
+
+					if (!_isMultiPomJar(jar)) {
+						if (fileName.equalsIgnoreCase("pom.xml")) {
+							content = _getUpdatedPomXml(
+								content, groupId, artifactId, version);
+						}
+						else if (fileName.equalsIgnoreCase("pom.properties")) {
+							content = _getUpdatedPomProperties(
+								content, groupId, artifactId, version);
+						}
 					}
-					else if (fileName.equalsIgnoreCase("pom.properties")) {
-						content = _getUpdatedPomProperties(
-							content, groupId, artifactId, version);
-					}
+
+					jarOutputStream.putNextEntry(new JarEntry(entry.getName()));
+
+					jarOutputStream.write(content);
+
+					jarOutputStream.closeEntry();
 				}
-
-				jarOutputStream.putNextEntry(new JarEntry(entry.getName()));
-
-				jarOutputStream.write(content);
-
-				jarOutputStream.closeEntry();
 			}
 		}
 
