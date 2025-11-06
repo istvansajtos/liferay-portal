@@ -8,7 +8,6 @@ package com.liferay.gradle.plugins.patcher.internal.util;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -21,7 +20,6 @@ import java.util.Properties;
 import java.util.jar.Attributes;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
-import java.util.jar.JarInputStream;
 import java.util.jar.JarOutputStream;
 import java.util.jar.Manifest;
 
@@ -65,14 +63,14 @@ public class ArtifactPostProcessorUtil {
 
 		File newJar = new File(jar.getParent(), "new-" + jar.getName());
 
-		try (JarInputStream jarInputStream = new JarInputStream(
-				new FileInputStream(jar));
-			JarOutputStream jarOutputStream = _getJarOutputStream(
+		try (JarOutputStream jarOutputStream = _getJarOutputStream(
 				manifest, newJar)) {
 
-			JarEntry entry;
+			Enumeration<JarEntry> enumeration = jarFile.entries();
 
-			while ((entry = jarInputStream.getNextJarEntry()) != null) {
+			while (enumeration.hasMoreElements()) {
+				JarEntry entry = enumeration.nextElement();
+
 				Path path = Paths.get(entry.getName());
 
 				String fileName = String.valueOf(path.getFileName());
