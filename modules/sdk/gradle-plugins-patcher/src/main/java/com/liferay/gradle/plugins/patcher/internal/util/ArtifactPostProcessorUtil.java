@@ -12,8 +12,10 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 
+import java.nio.file.Path;
 import java.nio.file.Paths;
 
+import java.util.Enumeration;
 import java.util.Properties;
 import java.util.jar.Attributes;
 import java.util.jar.JarEntry;
@@ -80,13 +82,15 @@ public class ArtifactPostProcessorUtil {
 
 				byte[] content = jarInputStream.readAllBytes();
 
-				if (fileName.equalsIgnoreCase("pom.xml")) {
-					content = _getUpdatedPomXml(
-						content, groupId, artifactId, version);
-				}
-				else if (fileName.equalsIgnoreCase("pom.properties")) {
-					content = _getUpdatedPomProperties(
-						content, groupId, artifactId, version);
+				if (!_isMultiPomJar(jar)) {
+					if (fileName.equalsIgnoreCase("pom.xml")) {
+						content = _getUpdatedPomXml(
+							content, groupId, artifactId, version);
+					}
+					else if (fileName.equalsIgnoreCase("pom.properties")) {
+						content = _getUpdatedPomProperties(
+							content, groupId, artifactId, version);
+					}
 				}
 
 				jarOutputStream.putNextEntry(new JarEntry(entry.getName()));
@@ -184,6 +188,34 @@ public class ArtifactPostProcessorUtil {
 
 			return byteArrayOutputStream.toByteArray();
 		}
+	}
+
+	private static boolean _isMultiPomJar(File jar) throws IOException {
+		int count = 0;
+
+		JarFile jarFile = new JarFile(jar);
+
+		Enumeration<JarEntry> enumeration = jarFile.entries();
+
+		while (enumeration.hasMoreElements()) {
+			JarEntry entry = enumeration.nextElement();
+
+			Path path = Paths.get(entry.getName());
+
+			String fileName = String.valueOf(path.getFileName());
+
+			if (fileName.equals("pom.xml")) {
+				count++;
+			}
+		}
+
+		jarFile.close();
+
+		if (count > 1) {
+			return true;
+		}
+
+		return false;
 	}
 
 	private static void _removeWhitespaceNodes(Element element) {
