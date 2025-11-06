@@ -12,6 +12,8 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 
+import java.nio.file.Paths;
+
 import java.util.Properties;
 import java.util.jar.Attributes;
 import java.util.jar.JarEntry;
@@ -68,21 +70,21 @@ public class ArtifactPostProcessorUtil {
 			JarEntry entry;
 
 			while ((entry = jarInputStream.getNextJarEntry()) != null) {
-				String fileName = entry.getName();
+				Path path = Paths.get(entry.getName());
 
-				fileName = fileName.toLowerCase();
+				String fileName = String.valueOf(path.getFileName());
 
-				if (fileName.endsWith("manifest.mf")) {
+				if (fileName.equalsIgnoreCase("manifest.mf")) {
 					continue;
 				}
 
 				byte[] content = jarInputStream.readAllBytes();
 
-				if (fileName.endsWith("pom.xml")) {
+				if (fileName.equalsIgnoreCase("pom.xml")) {
 					content = _getUpdatedPomXml(
 						content, groupId, artifactId, version);
 				}
-				else if (fileName.endsWith("pom.properties")) {
+				else if (fileName.equalsIgnoreCase("pom.properties")) {
 					content = _getUpdatedPomProperties(
 						content, groupId, artifactId, version);
 				}
