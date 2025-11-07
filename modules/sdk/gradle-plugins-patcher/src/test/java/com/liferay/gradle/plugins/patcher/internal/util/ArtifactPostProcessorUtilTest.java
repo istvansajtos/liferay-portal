@@ -33,7 +33,8 @@ public class ArtifactPostProcessorUtilTest {
 		Path tempDirPath = Files.createTempDirectory("jartest");
 
 		File jar1 = _getTestJar(
-			tempDirPath, "test.jar", "old.group", "old-artifact", "0.0.1");
+			tempDirPath, "test.jar", "old.group", "old-artifact", "0.0.1",
+			"OldVendor", "old.vendor");
 
 		String groupId = "new.group";
 		String artifactId = "new-artifact";
@@ -62,8 +63,29 @@ public class ArtifactPostProcessorUtilTest {
 		Attributes attributes = manifest.getMainAttributes();
 
 		Assert.assertEquals(
+			artifactId, attributes.getValue("Application-Name"));
+		Assert.assertEquals(
+			artifactId, attributes.getValue("Automatic-Module-Name"));
+		Assert.assertEquals(artifactId, attributes.getValue("Bundle-Name"));
+		Assert.assertEquals(
 			artifactId, attributes.getValue("Bundle-SymbolicName"));
+		Assert.assertEquals(artifactId, attributes.getValue("Extension-Name"));
+		Assert.assertEquals(
+			artifactId, attributes.getValue("Implementation-Title"));
+		Assert.assertEquals(
+			"Liferay, Inc", attributes.getValue("Bundle-Vendor"));
+		Assert.assertEquals(
+			"Liferay, Inc", attributes.getValue("Implementation-Vendor"));
+		Assert.assertEquals(
+			"com.liferay", attributes.getValue("Implementation-Vendor-Id"));
+		Assert.assertEquals(version, attributes.getValue("Build-Id"));
+		Assert.assertEquals(version, attributes.getValue("Build-Version"));
 		Assert.assertEquals(version, attributes.getValue("Bundle-Version"));
+		Assert.assertEquals(
+			version, attributes.getValue("Implementation-Build-Id"));
+		Assert.assertEquals(
+			version, attributes.getValue("Implementation-Version"));
+		Assert.assertEquals(version, attributes.getValue("Major-Version"));
 	}
 
 	private void _assertPomPropertiesValues(
@@ -105,7 +127,7 @@ public class ArtifactPostProcessorUtilTest {
 
 	private File _getTestJar(
 			Path dirPath, String fileName, String groupId, String artifactId,
-			String version)
+			String version, String vendor, String vendorId)
 		throws Exception {
 
 		Path jarPath = dirPath.resolve(fileName);
@@ -114,9 +136,22 @@ public class ArtifactPostProcessorUtilTest {
 
 		Attributes attributes = manifest.getMainAttributes();
 
-		attributes.putValue("Manifest-Version", "1.0");
+		attributes.putValue("Application-Name", artifactId);
+		attributes.putValue("Automatic-Module-Name", artifactId);
+		attributes.putValue("Build-Id", version);
+		attributes.putValue("Build-Version", version);
+		attributes.putValue("Bundle-Name", artifactId);
 		attributes.putValue("Bundle-SymbolicName", artifactId);
+		attributes.putValue("Bundle-Vendor", vendor);
 		attributes.putValue("Bundle-Version", version);
+		attributes.putValue("Extension-Name", artifactId);
+		attributes.putValue("Implementation-Build-Id", version);
+		attributes.putValue("Implementation-Title", artifactId);
+		attributes.putValue("Implementation-Version", version);
+		attributes.putValue("Implementation-Vendor", vendor);
+		attributes.putValue("Implementation-Vendor-Id", vendorId);
+		attributes.putValue("Major-Version", version);
+		attributes.putValue("Manifest-Version", "1.0");
 
 		try (JarOutputStream jarOutputStream = new JarOutputStream(
 				Files.newOutputStream(jarPath), manifest)) {
