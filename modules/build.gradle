@@ -27,6 +27,21 @@ buildscript {
 
 apply plugin: "com.liferay.yarn.defaults.plugin"
 
+allprojects {
+    // A 't ->' rész mondja meg, hogy az aktuális elemet 't'-nek hívjuk
+    tasks.configureEach { t ->
+        
+        // Először ellenőrizzük, hogy van-e ilyen tulajdonsága (hogy elkerüljük a cleanNPM hibát)
+        if (t.hasProperty('environment')) {
+            try {
+                t.environment 'NPM_CONFIG_IGNORE_SCRIPTS', 'true'
+            } catch (Exception e) {
+                // Ha mégsem írható, nem csinálunk semmit
+            }
+        }
+    }
+}
+
 ext {
 	buildJakartaTransformerEnabled = GradleUtil.getProperty(rootProject, "build.jakarta.transformer.enabled", false)
 	buildJakartaTransformerExcludedDependencies = _toList(rootProject.findProperty("build.jakarta.transformer.excluded.dependencies"))

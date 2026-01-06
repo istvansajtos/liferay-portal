@@ -42,3 +42,13 @@ dependencies {
 	compileOnly project(":core:petra:petra-string")
 	testImplementation group: "com.liferay.portal", name: "com.liferay.portal.test", version: "default"
 }
+
+task checkNpmIgnoreScripts(type: Exec) {
+    commandLine 'npm', 'config', 'get', 'ignore-scripts'
+    
+    doLast {
+        println "\n--- VÉGEREDMÉNY ---"
+        println "Ha a fenti szám/szöveg 'true', akkor működik."
+        println "-------------------"
+    }
+}
