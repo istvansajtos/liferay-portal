@@ -153,6 +153,7 @@ public class NodeExecutor {
 
 				@Override
 				public void execute(ExecSpec execSpec) {
+					System.out.println("---commandLine: " + _getCommandLine());
 					execSpec.setCommandLine(_getCommandLine());
 					execSpec.setEnvironment(
 						_getEnvironment(execSpec.getEnvironment()));
@@ -224,6 +225,8 @@ public class NodeExecutor {
 			commandLine.add(_getExecutable());
 			commandLine.addAll(GradleUtil.toStringList(getArgs()));
 		}
+
+		System.out.println(commandLine.toString());
 
 		return commandLine;
 	}

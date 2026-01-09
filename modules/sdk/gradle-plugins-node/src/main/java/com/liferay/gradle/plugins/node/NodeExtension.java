@@ -300,6 +300,10 @@ public class NodeExtension {
 	}
 
 	public void setUseNpm(Object useNpm) {
+		System.out.println("---setUseNpm(" + (Boolean) useNpm + ")");
+		System.out.println("---");
+		System.out.println(Thread.currentThread().getStackTrace());
+		System.out.println("---");
 		_useNpm = useNpm;
 	}
 
