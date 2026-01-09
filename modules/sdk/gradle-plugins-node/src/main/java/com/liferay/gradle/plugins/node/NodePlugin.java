@@ -14,6 +14,7 @@ import com.liferay.gradle.plugins.node.task.ExecuteNodeTask;
 import com.liferay.gradle.plugins.node.task.ExecutePackageManagerTask;
 import com.liferay.gradle.plugins.node.task.NpmInstallTask;
 import com.liferay.gradle.plugins.node.task.NpmShrinkwrapTask;
+import com.liferay.gradle.plugins.node.task.PackageExecAllowScriptsTask;
 import com.liferay.gradle.plugins.node.task.PackageRunBuildTask;
 import com.liferay.gradle.plugins.node.task.PackageRunTask;
 import com.liferay.gradle.plugins.node.task.PackageRunTestTask;
@@ -81,6 +82,12 @@ public class NodePlugin implements Plugin<Project> {
 
 	public static final String NPM_SHRINKWRAP_TASK_NAME = "npmShrinkwrap";
 
+	public static final String PACKAGE_EXEC_ALLOW_SCRIPTS_SETUP_TASK_NAME = "packageExecAllowScriptsSetup";
+
+	public static final String PACKAGE_EXEC_ALLOW_SCRIPTS_AUTO_TASK_NAME = "packageExecAllowScriptsAuto";
+
+	public static final String PACKAGE_INSTALL_ALLOW_SCRIPTS_TASK_NAME = "packageInstallAllowScripts";
+
 	public static final String PACKAGE_RUN_BUILD_TASK_NAME = "packageRunBuild";
 
 	public static final String PACKAGE_RUN_TEST_TASK_NAME = "packageRunTest";
@@ -115,6 +122,11 @@ public class NodePlugin implements Plugin<Project> {
 		_addTaskNpmPackageLock(project, cleanNpmTask, npmInstallTask);
 		_addTaskNpmShrinkwrap(project, cleanNpmTask, npmInstallTask);
 		_addTasksPackageRun(npmInstallTask, packageJsonMap, nodeExtension);
+
+		DownloadNodeModuleTask downloadNodeModuleTask = _addTaskPackageInstallAllowScripts(project, npmInstallTask,  packageJsonMap);
+
+		//ExecutePackageManagerTask executePackageManagerTask = _addTaskPackageExecAllowScriptsSetup(project, downloadNodeModuleTask, nodeExtension);
+		//ExecutePackageManagerTask executePackageManagerTask2 = _addTaskPackageExecAllowScriptsAuto(project, downloadNodeModuleTask, nodeExtension);
 
 		_configureTasksDownloadNodeModule(
 			project, npmInstallTask, packageJsonMap);
@@ -405,6 +417,65 @@ public class NodePlugin implements Plugin<Project> {
 
 		return packageRunTestTask;
 	}
+
+	private DownloadNodeModuleTask _addTaskPackageInstallAllowScripts(Project project, NpmInstallTask npmInstallTask, Map<String, Object> packageJsonMap) {
+		final DownloadNodeModuleTask downloadNodeModuleTask = GradleUtil.addTask(
+			project, PACKAGE_INSTALL_ALLOW_SCRIPTS_TASK_NAME, DownloadNodeModuleTask.class);
+
+		downloadNodeModuleTask.dependsOn(npmInstallTask);
+		downloadNodeModuleTask.setModuleName("@lavamoat/allow-scripts");
+		downloadNodeModuleTask.setModuleVersion("3.4.0");
+		downloadNodeModuleTask.setGroup(BasePlugin.BUILD_GROUP);
+
+		_configureTaskDownloadNodeModule(downloadNodeModuleTask, npmInstallTask, packageJsonMap);
+
+		return downloadNodeModuleTask;
+	}
+
+	/*private void _addTaskPackageExecAllowScriptsSetup(Project project, DownloadNodeModuleTask downloadNodeModuleTask, Map<String, Object> packageJsonMap) {
+		final PackageExecAllowScriptsTask packageExecAllowScriptsTask = GradleUtil.addTask(
+			project, PACKAGE_EXEC_ALLOW_SCRIPTS_TASK_NAME, PackageExecAllowScriptsTask.class);
+
+		packageExecAllowScriptsTask.dependsOn(downloadNodeModuleTask);
+		packageExecAllowScriptsTask.setGroup(BasePlugin.BUILD_GROUP);
+		packageExecAllowScriptsTask.setNpmInstallRetries(3);
+	}*/
+/*
+	private ExecutePackageManagerTask _addTaskPackageExecAllowScriptsAuto(Project project, ExecutePackageManagerTask executePackageManagerTask, NodeExtension nodeExtension) {
+		final ExecutePackageManagerTask executePackageManagerTask2 = GradleUtil.addTask(
+			project, PACKAGE_EXEC_ALLOW_SCRIPTS_AUTO_TASK_NAME, ExecutePackageManagerTask.class);
+
+		executePackageManagerTask2.dependsOn(executePackageManagerTask);
+		executePackageManagerTask2.setGroup(BasePlugin.BUILD_GROUP);
+
+		if (nodeExtension.isUseNpm()) {
+			executePackageManagerTask2.args("exec");
+		}
+
+		executePackageManagerTask2.args("allow-scripts", "auto");
+
+		return executePackageManagerTask2;
+	}
+*/
+/*	private ExecutePackageManagerTask _addTaskPackageExecAllowScriptsSetup(Project project, DownloadNodeModuleTask downloadNodeModuleTask, NodeExtension nodeExtension) {
+		final ExecutePackageManagerTask executePackageManagerTask = GradleUtil.addTask(
+			project, PACKAGE_EXEC_ALLOW_SCRIPTS_SETUP_TASK_NAME, ExecutePackageManagerTask.class);
+
+		executePackageManagerTask.dependsOn(downloadNodeModuleTask);
+		executePackageManagerTask.setGroup(BasePlugin.BUILD_GROUP);
+
+		if (nodeExtension.isUseNpm()) {
+			executePackageManagerTask.args("exec");
+		}
+
+		executePackageManagerTask.args("allow-scripts", "setup");
+
+		if (nodeExtension.isUseNpm()) {
+			executePackageManagerTask.environment(
+				"npm_config_legacy_peer_deps", "true");
+		}
+		return executePackageManagerTask;
+	}*/
 
 	@SuppressWarnings("unchecked")
 	private void _addTasksPackageRun(
