@@ -196,7 +196,7 @@ public class NodeExecutor {
 		String line = null;
 
 		while ((line = bufferedReader.readLine()) != null) {
-			System.out.println(line);
+			System.out.println("---" +  line);
 
 			sb.append(line + System.lineSeparator());
 		}
@@ -226,7 +226,7 @@ public class NodeExecutor {
 			commandLine.addAll(GradleUtil.toStringList(getArgs()));
 		}
 
-		System.out.println(commandLine.toString());
+		System.out.println("---commandLine"  + commandLine.toString());
 
 		return commandLine;
 	}
