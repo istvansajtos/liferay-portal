@@ -126,7 +126,7 @@ public class NodePlugin implements Plugin<Project> {
 		DownloadNodeModuleTask downloadNodeModuleTask = _addTaskPackageInstallAllowScripts(project, npmInstallTask,  packageJsonMap);
 
 		ExecutePackageManagerTask executePackageManagerTask = _addTaskPackageExecAllowScriptsSetup(project, downloadNodeModuleTask, nodeExtension);
-		//ExecutePackageManagerTask executePackageManagerTask2 = _addTaskPackageExecAllowScriptsAuto(project, executePackageManagerTask, nodeExtension);
+		ExecutePackageManagerTask executePackageManagerTask2 = _addTaskPackageExecAllowScriptsAuto(project, executePackageManagerTask, nodeExtension);
 
 		_configureTasksDownloadNodeModule(
 			project, npmInstallTask, packageJsonMap);
@@ -440,7 +440,7 @@ public class NodePlugin implements Plugin<Project> {
 		packageExecAllowScriptsTask.setGroup(BasePlugin.BUILD_GROUP);
 		packageExecAllowScriptsTask.setNpmInstallRetries(3);
 	}*/
-/*
+
 	private ExecutePackageManagerTask _addTaskPackageExecAllowScriptsAuto(Project project, ExecutePackageManagerTask executePackageManagerTask, NodeExtension nodeExtension) {
 		final ExecutePackageManagerTask executePackageManagerTask2 = GradleUtil.addTask(
 			project, PACKAGE_EXEC_ALLOW_SCRIPTS_AUTO_TASK_NAME, ExecutePackageManagerTask.class);
@@ -455,7 +455,7 @@ public class NodePlugin implements Plugin<Project> {
 		executePackageManagerTask2.args("allow-scripts", "auto");
 
 		return executePackageManagerTask2;
-	}*/
+	}
 
 	private ExecutePackageManagerTask _addTaskPackageExecAllowScriptsSetup(Project project, DownloadNodeModuleTask downloadNodeModuleTask, NodeExtension nodeExtension) {
 		final ExecutePackageManagerTask executePackageManagerTask = GradleUtil.addTask(
