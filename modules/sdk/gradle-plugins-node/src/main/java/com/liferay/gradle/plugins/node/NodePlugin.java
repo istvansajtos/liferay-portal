@@ -461,8 +461,14 @@ public class NodePlugin implements Plugin<Project> {
 		final ExecutePackageManagerTask executePackageManagerTask = GradleUtil.addTask(
 			project, PACKAGE_EXEC_ALLOW_SCRIPTS_SETUP_TASK_NAME, ExecutePackageManagerTask.class);
 
+		Task postAllowScriptsInstall = GradleUtil.addTask(
+			project,
+			"npmInstallAfterAllowScriptsSetup",
+			NpmInstallTask.class
+		);
+
 		executePackageManagerTask.dependsOn(downloadNodeModuleTask);
-		executePackageManagerTask.finalizedBy(npmInstallTask);
+		executePackageManagerTask.finalizedBy(postAllowScriptsInstall);
 		executePackageManagerTask.setGroup(BasePlugin.BUILD_GROUP);
 
 		if (nodeExtension.isUseNpm()) {
