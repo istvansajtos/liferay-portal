@@ -125,7 +125,7 @@ public class NodePlugin implements Plugin<Project> {
 
 		DownloadNodeModuleTask downloadNodeModuleTask = _addTaskPackageInstallAllowScripts(project, npmInstallTask,  packageJsonMap);
 
-		ExecutePackageManagerTask executePackageManagerTask = _addTaskPackageExecAllowScriptsSetup(project, downloadNodeModuleTask, nodeExtension);
+		ExecutePackageManagerTask executePackageManagerTask = _addTaskPackageExecAllowScriptsSetup(project, downloadNodeModuleTask, npmInstallTask, nodeExtension);
 		ExecutePackageManagerTask executePackageManagerTask2 = _addTaskPackageExecAllowScriptsAuto(project, executePackageManagerTask, nodeExtension);
 
 		_configureTasksDownloadNodeModule(
@@ -457,11 +457,12 @@ public class NodePlugin implements Plugin<Project> {
 		return executePackageManagerTask2;
 	}
 
-	private ExecutePackageManagerTask _addTaskPackageExecAllowScriptsSetup(Project project, DownloadNodeModuleTask downloadNodeModuleTask, NodeExtension nodeExtension) {
+	private ExecutePackageManagerTask _addTaskPackageExecAllowScriptsSetup(Project project, DownloadNodeModuleTask downloadNodeModuleTask, NpmInstallTask npmInstallTask, NodeExtension nodeExtension) {
 		final ExecutePackageManagerTask executePackageManagerTask = GradleUtil.addTask(
 			project, PACKAGE_EXEC_ALLOW_SCRIPTS_SETUP_TASK_NAME, ExecutePackageManagerTask.class);
 
 		executePackageManagerTask.dependsOn(downloadNodeModuleTask);
+		executePackageManagerTask.finalizedBy(npmInstallTask);
 		executePackageManagerTask.setGroup(BasePlugin.BUILD_GROUP);
 
 		if (nodeExtension.isUseNpm()) {
