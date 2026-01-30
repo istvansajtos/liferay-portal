@@ -481,9 +481,7 @@ public class NodePlugin implements Plugin<Project> {
 
 			executePackageManagerTask.finalizedBy(postAllowScriptsInstallTask);
 		}
-
-		postAllowScriptsInstallTask
-
+		
 		executePackageManagerTask.dependsOn(downloadNodeModuleTask);
 
 		executePackageManagerTask.setGroup(BasePlugin.BUILD_GROUP);
