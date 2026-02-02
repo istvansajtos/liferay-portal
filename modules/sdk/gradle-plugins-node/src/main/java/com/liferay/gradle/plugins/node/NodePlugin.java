@@ -325,6 +325,8 @@ public class NodePlugin implements Plugin<Project> {
 
 		String taskName = _PACKAGE_RUN_TASK_NAME_PREFIX + suffix;
 
+		System.out.println("---_addTaskPackageRun: " + taskName);
+
 		PackageRunTask packageRunTask = GradleUtil.addTask(
 			project, taskName, PackageRunTask.class);
 
@@ -481,7 +483,7 @@ public class NodePlugin implements Plugin<Project> {
 
 			executePackageManagerTask.finalizedBy(postAllowScriptsInstallTask);
 		}
-		
+
 		executePackageManagerTask.dependsOn(downloadNodeModuleTask);
 
 		executePackageManagerTask.setGroup(BasePlugin.BUILD_GROUP);
@@ -503,6 +505,8 @@ public class NodePlugin implements Plugin<Project> {
 	private void _addTasksPackageRun(
 		NpmInstallTask npmInstallTask, Map<String, Object> packageJsonMap,
 		NodeExtension nodeExtension) {
+
+		System.out.println("---_addTaskPackageRun...");
 
 		if (packageJsonMap == null) {
 			return;
