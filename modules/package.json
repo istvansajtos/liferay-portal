@@ -1,49 +1,54 @@
 {
-	"devDependencies": {
-		"@lavamoat/allow-scripts": "3.4.0",
-		"@liferay/eslint-plugin": "1.9.1",
-		"@liferay/prettier-plugin": "1.1.5",
-		"@liferay/stylelint-plugin": "1.1.0",
-		"@testing-library/react": "16.3.0",
-		"@types/ckeditor4": "4.16.2",
-		"@types/codemirror": "^5.60.5",
-		"@types/react": "18.2.19",
-		"@types/react-dom": "^18.2.12",
-		"@types/react-router-dom": "^5.3.3",
-		"@types/react-transition-group": "^4.4.6",
-		"@types/uuid": "10.0.0",
-		"@types/warning": "^3.0.0",
-		"acorn": "7.1.1",
-		"alloy-ui": "^3.1.0-deprecated.40",
-		"compass-mixins": "0.12.10",
-		"cross-env": "7.0.0",
-		"eslint-plugin-react-compiler": "^19.0.0-beta-8a03594-20241020",
-		"fetch-mock": "^5.13.1",
-		"jsdoc": "3.6.3",
-		"liferay-frontend-common-css": "1.0.4",
-		"resize-observer-polyfill": "^1.5.1"
-	},
-	"private": true,
-	"resolutions": {
-		"@types/html-minifier-terser": "5.1.0",
-		"typescript": "4.7.4",
-		"ua-parser-js": "^0.7.30"
-	},
-	"scripts": {
-		"checkFormat": "node-scripts check:ci",
-		"format": "node-scripts format:ci --all",
-		"formatCurrentBranch": "node-scripts format:ci --current-branch",
-		"formatLocalChanges": "node-scripts format:ci --local-changes",
-		"test:all": "node-scripts test"
-	},
-	"workspaces": {
-		"packages": [
-			"apps/*/*",
-			"apps/*/*/*",
-			"dxp/apps/*/*",
-			"dxp/apps/osb/osb-patcher/*",
-			"util/portal-tools-rest-builder-test-client-js",
-			"_node-scripts"
-		]
-	}
+  "devDependencies": {
+    "@lavamoat/allow-scripts": "3.4.0",
+    "@liferay/eslint-plugin": "1.9.1",
+    "@liferay/prettier-plugin": "1.1.5",
+    "@liferay/stylelint-plugin": "1.1.0",
+    "@testing-library/react": "16.3.0",
+    "@types/ckeditor4": "4.16.2",
+    "@types/codemirror": "^5.60.5",
+    "@types/react": "18.2.19",
+    "@types/react-dom": "^18.2.12",
+    "@types/react-router-dom": "^5.3.3",
+    "@types/react-transition-group": "^4.4.6",
+    "@types/uuid": "10.0.0",
+    "@types/warning": "^3.0.0",
+    "acorn": "7.1.1",
+    "alloy-ui": "^3.1.0-deprecated.40",
+    "compass-mixins": "0.12.10",
+    "cross-env": "7.0.0",
+    "eslint-plugin-react-compiler": "^19.0.0-beta-8a03594-20241020",
+    "fetch-mock": "^5.13.1",
+    "jsdoc": "3.6.3",
+    "liferay-frontend-common-css": "1.0.4",
+    "resize-observer-polyfill": "^1.5.1"
+  },
+  "private": true,
+  "resolutions": {
+    "@types/html-minifier-terser": "5.1.0",
+    "typescript": "4.7.4",
+    "ua-parser-js": "^0.7.30"
+  },
+  "scripts": {
+    "checkFormat": "node-scripts check:ci",
+    "format": "node-scripts format:ci --all",
+    "formatCurrentBranch": "node-scripts format:ci --current-branch",
+    "formatLocalChanges": "node-scripts format:ci --local-changes",
+    "test:all": "node-scripts test"
+  },
+  "workspaces": {
+    "packages": [
+      "apps/*/*",
+      "apps/*/*/*",
+      "dxp/apps/*/*",
+      "dxp/apps/osb/osb-patcher/*",
+      "util/portal-tools-rest-builder-test-client-js",
+      "_node-scripts"
+    ]
+  },
+  "lavamoat": {
+    "allowScripts": {
+      "@liferay/eslint-plugin": false
+    }
+  }
 }
