@@ -1,6 +1,7 @@
 {
   "devDependencies": {
     "@lavamoat/allow-scripts": "3.4.0",
+    "@lavamoat/preinstall-always-fail": "^2.1.1",
     "@liferay/eslint-plugin": "1.9.1",
     "@liferay/prettier-plugin": "1.1.5",
     "@liferay/stylelint-plugin": "1.1.0",
