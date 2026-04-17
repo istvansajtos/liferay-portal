@@ -328,7 +328,7 @@ public class NodePlugin implements Plugin<Project> {
 
 		return downloadNodeModuleTask;
 	}
-	
+
 	/*
 	private ExecutePackageManagerTask _addTaskPackageExecAllowScriptsAuto(Project project, ExecutePackageManagerTask executePackageManagerTask, NodeExtension nodeExtension) {
 		final ExecutePackageManagerTask executePackageManagerTask2 = GradleUtil.addTask(
