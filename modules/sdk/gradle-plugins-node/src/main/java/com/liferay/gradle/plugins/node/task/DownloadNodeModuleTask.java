@@ -81,6 +81,7 @@ public class DownloadNodeModuleTask extends ExecutePackageManagerTask {
 		_moduleVersion = moduleVersion;
 	}
 
+
 	@Internal
 	@Override
 	protected List<String> getCompleteArgs() {

@@ -322,6 +322,8 @@ public class NodePlugin implements Plugin<Project> {
 		downloadNodeModuleTask.dependsOn(npmInstallTask);
 		downloadNodeModuleTask.setModuleName("@lavamoat/allow-scripts");
 		downloadNodeModuleTask.setModuleVersion("3.4.0");
+		downloadNodeModuleTask.setProduction(false);
+		downloadNodeModuleTask.args("--ignore-workspace-root-check");
 		downloadNodeModuleTask.setGroup(BasePlugin.BUILD_GROUP);
 
 		_configureTaskDownloadNodeModule(downloadNodeModuleTask, npmInstallTask, packageJsonMap);
