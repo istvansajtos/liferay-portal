@@ -47,5 +47,8 @@
 			"test/playwright",
 			"util/portal-tools-rest-builder-test-client-js"
 		]
+	},
+	"dependencies": {
+		"@lavamoat/allow-scripts": "3.4.0"
 	}
 }
