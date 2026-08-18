@@ -195,6 +195,14 @@
 									"fragmentConfig": {
 										"buttonTestId": "contact-support-button",
 										"buttonUrl": {
+											"en_US": {
+												"layout": {
+													"groupId": "[$GROUP_ID$]",
+													"layoutId": "[$LAYOUT_ID:Support Ticket Escalation$]",
+													"privateLayout": false,
+													"title": "Support Ticket Escalation"
+												}
+											}
 										},
 										"iconLeft": false,
 										"iconRight": false,
