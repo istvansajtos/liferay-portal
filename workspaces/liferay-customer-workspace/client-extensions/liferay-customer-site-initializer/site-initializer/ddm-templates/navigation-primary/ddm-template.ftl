@@ -43,11 +43,11 @@
 					<#assign
 						secondaryCustomFields = navSecondaryItem.getExpandoAttributes()!{}
 
-						backgroundColor = secondaryCustomFields["Submenu Background"]?first!""
-						childColumns = secondaryCustomFields["Submenu Child Columns"]?first!""
+						backgroundColor = secondaryCustomFields["Submenu Background"]!?first!""
+						childColumns = secondaryCustomFields["Submenu Child Columns"]!?first!""
 						columnSpan = secondaryCustomFields["Submenu Column Span"]!?first!""
 						imageURL = getLocalizedExpandoValue(secondaryCustomFields["Menu Item Image URL"])!""
-						menuItemType = secondaryCustomFields["Menu Item Type"]?first!""
+						menuItemType = secondaryCustomFields["Menu Item Type"]!?first!""
 					/>
 
 					<#if childColumns?has_content>
@@ -68,11 +68,11 @@
 
 						<#list navSecondaryItem.getChildren() as navTertiaryItem>
 							<#assign
-								tertiaryCustomFields = navTertiaryItem.getExpandoAttributes()
+								tertiaryCustomFields = navTertiaryItem.getExpandoAttributes()!{}
 
 								descriptionText = getLocalizedExpandoValue(tertiaryCustomFields["Menu Item Description"])!""
 								imageURL = getLocalizedExpandoValue(tertiaryCustomFields["Menu Item Image URL"])!""
-								menuItemType = tertiaryCustomFields["Menu Item Type"]?first!""
+								menuItemType = tertiaryCustomFields["Menu Item Type"]!?first!""
 								preheaderText = getLocalizedExpandoValue(tertiaryCustomFields["Menu Item Preheader"])!""
 							/>
 
